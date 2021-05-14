@@ -1,0 +1,72 @@
+\documentclass[draft]{article}
+
+% - Style
+\usepackage{base}
+
+% - Plotting
+\usepackage{pgfplotstable}
+\usepgfplotslibrary{units}
+\usetikzlibrary{external}
+\tikzexternalize[mode=list and make]
+
+% - Listings
+\usepackage{color}
+\usepackage{listings}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize\color{black}
+  , commentstyle=\color{blue}
+  , keywordstyle=\color{purple}
+  , stringstyle=\color{orange}
+  %
+  , numbers=left
+  , numbersep=5pt
+  , stepnumber=1
+  , numberstyle=\ttfamily\small\color{black}
+  %
+  , keepspaces=true
+  , showspaces=false
+  , showstringspaces=false
+  , showtabs=false
+  , tabsize=2
+  , breaklines=true
+  %
+  , frame=single
+  , backgroundcolor=\color{white}
+  , rulecolor=\color{black}
+  , captionpos=b
+}
+
+% file or folder
+\lstdefinestyle{ff}{
+  basicstyle=\ttfamily\normalsize\color{orange}
+}
+
+% - Title
+\title{PHYS4004 - Assignment 3 - Game of Life (GPU)}
+\author{Tom Ross - 1834 2884}
+\date{}
+
+% - Headers
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\theauthor}
+\chead{}
+\lhead{\thetitle}
+\rfoot{\thepage}
+\cfoot{}
+\lfoot{}
+
+% - Document
+\begin{document}
+
+\tableofcontents
+
+\clearpage
+\section{Overview}
+\label{sec:overview}
+
+The entire code repository can be found at
+\url{https://github.com/dgsaf/game-of-life-gpu}.
+
+\end{document}

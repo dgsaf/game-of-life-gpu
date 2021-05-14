@@ -4,4 +4,4 @@
   - `ex1-gol-cuda/`
   - `ex2-gol-gpu-directives/`
   - `report/`
-  - `hpc-gpu-assignment-specification`
+  - `hpc-gpu-assignment-specification.pdf`

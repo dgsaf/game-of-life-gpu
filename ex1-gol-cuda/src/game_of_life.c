@@ -66,23 +66,64 @@ int* cpu_game_of_life(const int *initial_state, int n, int m, int nsteps){
     return grid;
 }
 
+//
+int cpu_write_timing(struct Options *opt, float elapsed_time)
+{
+  FILE *file = NULL;
+  char filename[100];
+  int ierr = 0;
+
+  // create filename for given options
+  sprintf(filename, "output/timing.n-%i.m-%i.nsteps-%i.txt", \
+          opt->n, opt->m,opt->nsteps);
+
+  printf("writing timing data to filename: %s\n", filename);
+
+  // open file
+  file = fopen(filename, "w");
+
+  if (file == NULL)
+  {
+    fprintf(stderr, "cannot open filename: %s\n", filename);
+    ierr = 1;
+  }
+  else
+  {
+    // write timing data
+    fprintf(file, "%f\n", elapsed_time);
+
+    // close file
+    fclose(file);
+  }
+
+  return ierr;
+}
+
 #ifndef INCLUDE_CPU_VERSION // do not define the main function if this file is included somewhere else.
 int main(int argc, char **argv)
 {
     struct Options *opt = (struct Options *) malloc(sizeof(struct Options));
     getinput(argc, argv, opt);
     int n = opt->n, m = opt->m, nsteps = opt->nsteps;
+
     int *initial_state = (int *) malloc(sizeof(int) * n * m);
     if(!initial_state){
         printf("Error while allocating memory.\n");
         return -1;
     }
+
     generate_IC(opt->iictype, initial_state, n, m);
+
     struct timeval start;
     start = init_time();
+
     int *final_state = cpu_game_of_life(initial_state, n, m, nsteps);
+
     float elapsed = get_elapsed_time(start);
-    printf("Finnished GOL in %f ms\n", elapsed);
+    printf("Finished GOL in %f ms\n", elapsed);
+
+    cpu_write_timing(opt, elapsed);
+
     free(final_state);
     free(initial_state);
     free(opt);

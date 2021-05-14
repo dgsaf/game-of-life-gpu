@@ -96,7 +96,7 @@ int* cpu_game_of_life(const int *initial_state, int n, int m, int nsteps)
 }
 
 // write timing data for cpu code to file
-int cpu_write_timing(struct Options *opt, float elapsed_time)
+int cpu_write_timing(struct Options const * opt, float const elapsed_time)
 {
   FILE *file = NULL;
   char filename[100];

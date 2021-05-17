@@ -55,7 +55,8 @@ void cpu_game_of_life_step(int *current_grid, int *next_grid, int n, int m)
 
 
 /*
-  Implements the game of life on a grid of size `n` times `m`, starting from the `initial_state` configuration.
+  Implements the game of life on a grid of size `n` times `m`, starting from
+  the `initial_state` configuration.
 
   If `nsteps` is positive, returns the last state reached.
 */
@@ -95,18 +96,19 @@ int* cpu_game_of_life(const int *initial_state, int n, int m, int nsteps)
   return grid;
 }
 
-// write timing data for cpu code to file
-int cpu_write_timing(struct Options const * opt, float const elapsed_time)
+// write timing data for gpu code to file
+int gpu_write_timing(struct Options const * opt, float const elapsed_time, \
+                     float const kernel_time)
 {
   FILE *file = NULL;
-  char filename[100];
+  char filename[200];
   int ierr = 0;
 
   // create filename for given options
-  sprintf(filename, "output/timing-cpu.n-%i.m-%i.nsteps-%i.txt", \
-          opt->n, opt->m,opt->nsteps);
+  sprintf(filename, "output/timing-gpu.n-%i.m-%i.nsteps-%i.txt",  \
+          opt->n, opt->m, opt->nsteps);
 
-  printf("writing timing data to filename: %s\n", filename);
+  printf("writing gpu timing data to filename: %s\n", filename);
 
   // open file
   file = fopen(filename, "w");
@@ -119,7 +121,8 @@ int cpu_write_timing(struct Options const * opt, float const elapsed_time)
   else
   {
     // write timing data
-    fprintf(file, "%f\n", elapsed_time);
+    fprintf(file, "# gpu_elapsed_time[ms], gpu_kernel_time[ms]\n");
+    fprintf(file, "%f, %f\n", elapsed_time, kernel_time);
 
     // close file
     fclose(file);
@@ -128,7 +131,8 @@ int cpu_write_timing(struct Options const * opt, float const elapsed_time)
   return ierr;
 }
 
-#ifndef INCLUDE_CPU_VERSION // do not define the main function if this file is included somewhere else.
+// do not define the main function if this file is included somewhere else.
+#ifndef INCLUDE_GPU_VERSION
 int main(int argc, char **argv)
 {
   struct Options *opt = (struct Options *) malloc(sizeof(struct Options));

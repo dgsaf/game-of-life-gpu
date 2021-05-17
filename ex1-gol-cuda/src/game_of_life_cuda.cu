@@ -1,58 +1,80 @@
 #include "common.h"
 
-void cpu_game_of_life_step(int *current_grid, int *next_grid, int n, int m)
+// CUDA error checking - derived from [https://stackoverflow.com/a/14038590]
+#define cuda_check_error(x) {cuda_examine(x, __FILE__, __LINE__);}
+inline void cuda_examine(cudaError_t code, const char * file, int line, \
+                         bool abort=true)
 {
-  int neighbours;
-  int n_i[8], n_j[8];
-  for(int i = 0; i < n; i++)
+  if (code != cudaSuccess)
   {
-    for(int j = 0; j < m; j++)
+    fprintf(stderr, "cuda_check_error: (%s:%d) %s\n", file, line, \
+            cudaGetErrorString(code));
+
+    if (abort)
     {
-      // count the number of neighbours, clockwise around the current cell.
-      neighbours = 0;
-      n_i[0] = i - 1; n_j[0] = j - 1;
-      n_i[1] = i - 1; n_j[1] = j;
-      n_i[2] = i - 1; n_j[2] = j + 1;
-      n_i[3] = i;     n_j[3] = j + 1;
-      n_i[4] = i + 1; n_j[4] = j + 1;
-      n_i[5] = i + 1; n_j[5] = j;
-      n_i[6] = i + 1; n_j[6] = j - 1;
-      n_i[7] = i;     n_j[7] = j - 1;
-
-      if (n_i[0] >= 0 && n_j[0] >= 0 \
-          && current_grid[n_i[0] * m + n_j[0]] == ALIVE) neighbours++;
-      if (n_i[1] >= 0                                                   \
-          && current_grid[n_i[1] * m + n_j[1]] == ALIVE) neighbours++;
-      if (n_i[2] >= 0 && n_j[2] < m \
-          && current_grid[n_i[2] * m + n_j[2]] == ALIVE) neighbours++;
-      if (n_j[3] < m \
-          && current_grid[n_i[3] * m + n_j[3]] == ALIVE) neighbours++;
-      if (n_i[4] < n && n_j[4] < m \
-          && current_grid[n_i[4] * m + n_j[4]] == ALIVE) neighbours++;
-      if (n_i[5] < n \
-          && current_grid[n_i[5] * m + n_j[5]] == ALIVE) neighbours++;
-      if (n_i[6] < n && n_j[6] >= 0 \
-          && current_grid[n_i[6] * m + n_j[6]] == ALIVE) neighbours++;
-      if (n_j[7] >= 0 \
-          && current_grid[n_i[7] * m + n_j[7]] == ALIVE) neighbours++;
-
-      if (current_grid[i*m + j] == ALIVE  \
-          && (neighbours == 2 || neighbours == 3))
-      {
-        next_grid[i*m + j] = ALIVE;
-      }
-      else if (current_grid[i*m + j] == DEAD && neighbours == 3)
-      {
-        next_grid[i*m + j] = ALIVE;
-      }
-      else
-      {
-        next_grid[i*m + j] = DEAD;
-      }
+      exit(code);
     }
   }
 }
 
+__global__ void gpu_game_of_life_step(int *current_grid, int *next_grid, \
+                                      int n, int m)
+{
+  // indexing variables
+  int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+  int i = idx / m;
+  int j = idx % m;
+
+  // only perform kernel for valid cell indexes
+  if ((i < n) && (j < m))
+  {
+    // neighbourhood variables
+    int neighbours;
+    int n_i[8], n_j[8];
+
+    // count the number of neighbours, clockwise around the current cell.
+    neighbours = 0;
+    n_i[0] = i - 1; n_j[0] = j - 1;
+    n_i[1] = i - 1; n_j[1] = j;
+    n_i[2] = i - 1; n_j[2] = j + 1;
+    n_i[3] = i;     n_j[3] = j + 1;
+    n_i[4] = i + 1; n_j[4] = j + 1;
+    n_i[5] = i + 1; n_j[5] = j;
+    n_i[6] = i + 1; n_j[6] = j - 1;
+    n_i[7] = i;     n_j[7] = j - 1;
+
+    if (n_i[0] >= 0 && n_j[0] >= 0                                    \
+        && current_grid[n_i[0] * m + n_j[0]] == ALIVE) neighbours++;
+    if (n_i[1] >= 0                                                   \
+        && current_grid[n_i[1] * m + n_j[1]] == ALIVE) neighbours++;
+    if (n_i[2] >= 0 && n_j[2] < m                                     \
+        && current_grid[n_i[2] * m + n_j[2]] == ALIVE) neighbours++;
+    if (n_j[3] < m                                                    \
+        && current_grid[n_i[3] * m + n_j[3]] == ALIVE) neighbours++;
+    if (n_i[4] < n && n_j[4] < m                                      \
+        && current_grid[n_i[4] * m + n_j[4]] == ALIVE) neighbours++;
+    if (n_i[5] < n                                                    \
+        && current_grid[n_i[5] * m + n_j[5]] == ALIVE) neighbours++;
+    if (n_i[6] < n && n_j[6] >= 0                                     \
+        && current_grid[n_i[6] * m + n_j[6]] == ALIVE) neighbours++;
+    if (n_j[7] >= 0                                                   \
+        && current_grid[n_i[7] * m + n_j[7]] == ALIVE) neighbours++;
+
+    if (current_grid[i*m + j] == ALIVE && (neighbours == 2 || neighbours == 3))
+    {
+      next_grid[i*m + j] = ALIVE;
+    }
+    else if (current_grid[i*m + j] == DEAD && neighbours == 3)
+    {
+      next_grid[i*m + j] = ALIVE;
+    }
+    else
+    {
+      next_grid[i*m + j] = DEAD;
+    }
+  }
+}
 
 /*
   Implements the game of life on a grid of size `n` times `m`, starting from
@@ -60,21 +82,21 @@ void cpu_game_of_life_step(int *current_grid, int *next_grid, int n, int m)
 
   If `nsteps` is positive, returns the last state reached.
 */
-int* gpu_game_of_life(const int *initial_state, int n, int m, int nsteps)
+int* gpu_game_of_life(const int *initial_state_gpu, int n, int m, int nsteps)
 {
-  int *grid = (int *) malloc(sizeof(int) * n * m);
-  int *updated_grid = (int *) malloc(sizeof(int) * n * m);
+  const int n_threads = 1024;
+  const int n_blocks = ((n * m - 1) / n_threads) + 1;
 
-  if (!grid || !updated_grid)
-  {
-    printf("Error while allocating memory.\n");
-    exit(1);
-  }
+  int *grid;
+  int *updated_grid;
+
+  cuda_error_check(cudaMalloc(&grid, sizeof(int) * n * m));
+  cuda_error_check(cudaMalloc(&updated_grid, sizeof(int) * n * m));
 
   int current_step = 0;
   int *tmp = NULL;
 
-  memcpy(grid, initial_state, sizeof(int) * n * m);
+  memcpy(grid, intial_state_gpu, sizeof(int) * n * m);
 
   while(current_step != nsteps)
   {
@@ -83,7 +105,7 @@ int* gpu_game_of_life(const int *initial_state, int n, int m, int nsteps)
     // Uncomment the following line if you want to print the state at every step
     // visualise(opt->ivisualisetype, current_step, grid, n, m);
 
-    cpu_game_of_life_step(grid, updated_grid, n, m);
+    gpu_game_of_life_step<<<n_blocks, n_threads>>>(grid, updated_grid, n, m);
 
     // swap current and updated grid
     tmp = grid;
@@ -91,7 +113,7 @@ int* gpu_game_of_life(const int *initial_state, int n, int m, int nsteps)
     updated_grid = tmp;
   }
 
-  free(updated_grid);
+  cudaFree(updated_grid);
 
   return grid;
 }
@@ -131,23 +153,6 @@ int gpu_write_timing(struct Options const * opt, float const elapsed_time, \
   return ierr;
 }
 
-// CUDA gpu error checking - derived from [https://stackoverflow.com/a/14038590]
-#define gpu_check_error(x) {gpu_examine(x, __FILE__, __LINE__);}
-inline void gpu_examine(cudaError_t code, const char * file, int line,  \
-                        bool abort=true)
-{
-  if (code != cudaSuccess)
-  {
-    fprintf(stderr, "gpu_check_error: (%s:%d) %s\n", file, line, \
-            cudaGetErrorString(code));
-
-    if (abort)
-    {
-      exit(code);
-    }
-  }
-}
-
 // do not define the main function if this file is included somewhere else.
 #ifndef INCLUDE_GPU_VERSION
 int main(int argc, char **argv)
@@ -164,7 +169,7 @@ int main(int argc, char **argv)
 
   if(!initial_state)
   {
-    printf("Error while allocating memory.\n");
+    printf("main: error while allocating memory.\n");
     return -1;
   }
 
@@ -178,12 +183,12 @@ int main(int argc, char **argv)
   int *intial_state_gpu;
   int *final_state_gpu;
 
-  gpu_error_check(cudaMalloc(&initial_state_gpu, sizeof(int) * n * m));
-  gpu_error_check(cudaMalloc(&final_state_gpu, sizeof(int) * n * m));
+  cuda_error_check(cudaMalloc(&initial_state_gpu, sizeof(int) * n * m));
+  cuda_error_check(cudaMalloc(&final_state_gpu, sizeof(int) * n * m));
 
   // copy initial state from CPU to GPU
-  gpu_error_check(cudaMemcpy(initial_state_gpu, initial_state,          \
-                             sizeof(int) * n * m, cudaMemcpyHostToDevice));
+  cuda_error_check(cudaMemcpy(initial_state_gpu, initial_state,          \
+                              sizeof(int) * n * m, cudaMemcpyHostToDevice));
 
   // initialise kernel timing
   struct timeval kernel_start;
@@ -196,8 +201,8 @@ int main(int argc, char **argv)
   float kernel_time = get_elapsed_time(kernel_start);
 
   // copy final state from GPU to CPU
-  gpu_error_check(cudaMemcpy(final_state, final_state_gpu,          \
-                             sizeof(int) * n * m, cudaMemcpyDeviceToHost));
+  cuda_error_check(cudaMemcpy(final_state, final_state_gpu,          \
+                              sizeof(int) * n * m, cudaMemcpyDeviceToHost));
 
   // finalise timing and write ouput
   float elapsed_time = get_elapsed_time(start);
@@ -206,7 +211,11 @@ int main(int argc, char **argv)
          (100.0 * kernel_time / elapsed_time));
   gpu_write_timing(opt, elapsed_time, kernel_time);
 
-  // free memory
+  // free gpu memory
+  cuda_error_check(cudaFree(initial_state_gpu));
+  cuda_error_check(cudaFree(final_state_gpu));
+
+  // free cpu memory
   free(final_state);
   free(initial_state);
   free(opt);

@@ -60,7 +60,7 @@ void cpu_game_of_life_step(int *current_grid, int *next_grid, int n, int m)
 
   If `nsteps` is positive, returns the last state reached.
 */
-int* cpu_game_of_life(const int *initial_state, int n, int m, int nsteps)
+int* gpu_game_of_life(const int *initial_state, int n, int m, int nsteps)
 {
   int *grid = (int *) malloc(sizeof(int) * n * m);
   int *updated_grid = (int *) malloc(sizeof(int) * n * m);
@@ -96,7 +96,7 @@ int* cpu_game_of_life(const int *initial_state, int n, int m, int nsteps)
   return grid;
 }
 
-// write timing data for gpu code to file
+// write timing data for gpu CUDA code to file
 int gpu_write_timing(struct Options const * opt, float const elapsed_time, \
                      float const kernel_time)
 {
@@ -105,7 +105,7 @@ int gpu_write_timing(struct Options const * opt, float const elapsed_time, \
   int ierr = 0;
 
   // create filename for given options
-  sprintf(filename, "output/timing-gpu.n-%i.m-%i.nsteps-%i.txt",  \
+  sprintf(filename, "output/timing-gpu-cuda.n-%i.m-%i.nsteps-%i.txt",  \
           opt->n, opt->m, opt->nsteps);
 
   printf("writing gpu timing data to filename: %s\n", filename);
@@ -131,16 +131,36 @@ int gpu_write_timing(struct Options const * opt, float const elapsed_time, \
   return ierr;
 }
 
+// CUDA gpu error checking - derived from [https://stackoverflow.com/a/14038590]
+#define gpu_check_error(x) {gpu_examine(x, __FILE__, __LINE__);}
+inline void gpu_examine(cudaError_t code, const char * file, int line,  \
+                        bool abort=true)
+{
+  if (code != cudaSuccess)
+  {
+    fprintf(stderr, "gpu_check_error: (%s:%d) %s\n", file, line, \
+            cudaGetErrorString(code));
+
+    if (abort)
+    {
+      exit(code);
+    }
+  }
+}
+
 // do not define the main function if this file is included somewhere else.
 #ifndef INCLUDE_GPU_VERSION
 int main(int argc, char **argv)
 {
+  // read input parameters
   struct Options *opt = (struct Options *) malloc(sizeof(struct Options));
 
   getinput(argc, argv, opt);
   int n = opt->n, m = opt->m, nsteps = opt->nsteps;
 
+  // generate initial conditions
   int *initial_state = (int *) malloc(sizeof(int) * n * m);
+  int *final_state = (int *) malloc(sizeof(int) * n * m);
 
   if(!initial_state)
   {
@@ -150,19 +170,47 @@ int main(int argc, char **argv)
 
   generate_IC(opt->iictype, initial_state, n, m);
 
+  // initialise total timing
   struct timeval start;
   start = init_time();
 
-  int *final_state = cpu_game_of_life(initial_state, n, m, nsteps);
+  // allocate gpu memory
+  int *intial_state_gpu;
+  int *final_state_gpu;
 
-  float elapsed = get_elapsed_time(start);
-  printf("Finished GOL in %f ms\n", elapsed);
+  gpu_error_check(cudaMalloc(&initial_state_gpu, sizeof(int) * n * m));
+  gpu_error_check(cudaMalloc(&final_state_gpu, sizeof(int) * n * m));
 
-  cpu_write_timing(opt, elapsed);
+  // copy initial state from CPU to GPU
+  gpu_error_check(cudaMemcpy(initial_state_gpu, initial_state,          \
+                             sizeof(int) * n * m, cudaMemcpyHostToDevice));
 
+  // initialise kernel timing
+  struct timeval kernel_start;
+  kernel_start = init_time();
+
+  // calculate final state
+  final_state_gpu = gpu_game_of_life(initial_state_gpu, n, m, nsteps);
+
+  // finalise kernel timing
+  float kernel_time = get_elapsed_time(kernel_start);
+
+  // copy final state from GPU to CPU
+  gpu_error_check(cudaMemcpy(final_state, final_state_gpu,          \
+                             sizeof(int) * n * m, cudaMemcpyDeviceToHost));
+
+  // finalise timing and write ouput
+  float elapsed_time = get_elapsed_time(start);
+
+  printf("Finished GOL in %f (%f%% kernel_time) ms\n", elapsed_time, \
+         (100.0 * kernel_time / elapsed_time));
+  gpu_write_timing(opt, elapsed_time, kernel_time);
+
+  // free memory
   free(final_state);
   free(initial_state);
   free(opt);
+
   return 0;
 }
 #endif

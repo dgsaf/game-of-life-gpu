@@ -134,11 +134,13 @@ int cpu_write_timing(struct Options const * opt, float const elapsed_time)
 #ifndef INCLUDE_CPU_VERSION
 int main(int argc, char **argv)
 {
+  // read input parameters
   struct Options *opt = (struct Options *) malloc(sizeof(struct Options));
 
   getinput(argc, argv, opt);
   int n = opt->n, m = opt->m, nsteps = opt->nsteps;
 
+  // generate initial conditions
   int *initial_state = (int *) malloc(sizeof(int) * n * m);
 
   if(!initial_state)
@@ -149,19 +151,24 @@ int main(int argc, char **argv)
 
   generate_IC(opt->iictype, initial_state, n, m);
 
+  // initialise timing
   struct timeval start;
   start = init_time();
 
+  // calculate final game_of_life state
   int *final_state = cpu_game_of_life(initial_state, n, m, nsteps);
 
-  float elapsed = get_elapsed_time(start);
-  printf("Finished GOL in %f ms\n", elapsed);
+  // finalise timing and write output
+  float elapsed_time = get_elapsed_time(start);
 
-  cpu_write_timing(opt, elapsed);
+  printf("Finished GOL in %f ms\n", elapsed_time);
+  cpu_write_timing(opt, elapsed_time);
 
+  // free memory
   free(final_state);
   free(initial_state);
   free(opt);
+
   return 0;
 }
 #endif

@@ -1,13 +1,13 @@
 #include "common.h"
 
 // CUDA error checking - derived from [https://stackoverflow.com/a/14038590]
-#define cuda_check_error(x) {cuda_examine(x, __FILE__, __LINE__);}
+#define cuda_error_check(x) {cuda_examine(x, __FILE__, __LINE__);}
 inline void cuda_examine(cudaError_t code, const char * file, int line, \
                          bool abort=true)
 {
   if (code != cudaSuccess)
   {
-    fprintf(stderr, "cuda_check_error: (%s:%d) %s\n", file, line, \
+    fprintf(stderr, "cuda_error_check: (%s:%d) %s\n", file, line, \
             cudaGetErrorString(code));
 
     if (abort)
@@ -96,7 +96,7 @@ int* gpu_game_of_life(const int *initial_state_gpu, int n, int m, int nsteps)
   int current_step = 0;
   int *tmp = NULL;
 
-  memcpy(grid, intial_state_gpu, sizeof(int) * n * m);
+  memcpy(grid, initial_state_gpu, sizeof(int) * n * m);
 
   while(current_step != nsteps)
   {
@@ -180,7 +180,7 @@ int main(int argc, char **argv)
   start = init_time();
 
   // allocate gpu memory
-  int *intial_state_gpu;
+  int *initial_state_gpu;
   int *final_state_gpu;
 
   cuda_error_check(cudaMalloc(&initial_state_gpu, sizeof(int) * n * m));

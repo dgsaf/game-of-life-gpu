@@ -228,7 +228,7 @@ int main(int argc, char **argv)
   gpu_write_timing(opt, elapsed_time, kernel_time);
 
   // visualise final state
-  visualise(VISUAL_ASCII, nsteps, final_state, n, m);
+  // visualise(VISUAL_ASCII, nsteps, final_state, n, m);
 
   // free cpu memory
   free(final_state);

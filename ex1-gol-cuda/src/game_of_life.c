@@ -166,7 +166,7 @@ int main(int argc, char **argv)
   cpu_write_timing(opt, elapsed_time);
 
   // visualise final state
-  visualise(VISUAL_ASCII, nsteps, final_state, n, m);
+  // visualise(VISUAL_ASCII, nsteps, final_state, n, m);
 
   // free memory
   free(final_state);

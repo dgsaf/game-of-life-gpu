@@ -123,6 +123,7 @@ int* gpu_game_of_life(const int *initial_state, int n, int m, int nsteps, \
    cuda_error_check(cudaEventRecord(kernel_start));
    gpu_game_of_life_step<<<n_blocks, n_threads>>>(grid, updated_grid, n, m);
    cuda_error_check(cudaEventRecord(kernel_stop));
+   cuda_error_check(cudaDeviceSynchronize());
    cuda_error_check(cudaEventElapsedTime(&kernel_time_step, kernel_start, \
                                          kernel_stop));
    *kernel_time += kernel_time_step;
@@ -222,7 +223,7 @@ int main(int argc, char **argv)
   // finalise timing and write ouput
   float elapsed_time = get_elapsed_time(start);
 
-  printf("Finished GOL in %f (%f%% kernel_time) ms\n", elapsed_time, \
+  printf("Finished GOL in %f ms (%f%% of time in kernel)\n", elapsed_time, \
          (100.0 * kernel_time / elapsed_time));
   gpu_write_timing(opt, elapsed_time, kernel_time);
 

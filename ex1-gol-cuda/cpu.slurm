@@ -2,7 +2,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:1
-#SBATCH --parition=gpuq
+#SBATCH --partition=gpuq
 #SBATCH --time=00:05:00
 #SBATCH --export=NONE
 

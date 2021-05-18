@@ -178,7 +178,8 @@ int gpu_write_timing(struct Options const * opt, float const elapsed_time, \
   else
   {
     // write timing data
-    fprintf(file, "# gpu_elapsed_time[ms], gpu_kernel_time[ms]\n");
+    fprintf(file, "# gpu_elapsed_time, gpu_kernel_time\n");
+    fprintf(file, "# [ms], [ms]\n");
     fprintf(file, "%f, %f\n", elapsed_time, kernel_time);
 
     // close file

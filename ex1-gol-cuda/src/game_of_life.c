@@ -120,7 +120,8 @@ int cpu_write_timing(struct Options const * opt, float const elapsed_time)
   else
   {
     // write timing data
-    fprintf(file, "# cpu_elapsed_time[ms]\n");
+    fprintf(file, "# cpu_elapsed_time\n");
+    fprintf(file, "# [ms]\n");
     fprintf(file, "%f\n", elapsed_time);
 
     // close file

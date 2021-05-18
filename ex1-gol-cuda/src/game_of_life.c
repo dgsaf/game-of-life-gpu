@@ -165,6 +165,9 @@ int main(int argc, char **argv)
   printf("Finished GOL in %f ms\n", elapsed_time);
   cpu_write_timing(opt, elapsed_time);
 
+  // visualise final state
+  visualise(VISUAL_ASCII, nsteps, final_state, n, m);
+
   // free memory
   free(final_state);
   free(initial_state);

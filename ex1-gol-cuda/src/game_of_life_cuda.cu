@@ -113,26 +113,26 @@ int* gpu_game_of_life(const int *initial_state, int n, int m, int nsteps, \
   int *tmp = NULL;
 
   while (current_step != nsteps)
- {
-   current_step++;
+  {
+    current_step++;
 
-   // Uncomment the following line if you want to print the state at every step
-   // visualise(opt->ivisualisetype, current_step, grid, n, m);
+    // Uncomment the following line if you want to print the state at every step
+    // visualise(opt->ivisualisetype, current_step, grid, n, m);
 
-   // execute game_of_life_step cuda kernel
-   cuda_error_check(cudaEventRecord(kernel_start));
-   gpu_game_of_life_step<<<n_blocks, n_threads>>>(grid, updated_grid, n, m);
-   cuda_error_check(cudaEventRecord(kernel_stop));
-   cuda_error_check(cudaDeviceSynchronize());
-   cuda_error_check(cudaEventElapsedTime(&kernel_time_step, kernel_start, \
-                                         kernel_stop));
-   *kernel_time += kernel_time_step;
+    // execute game_of_life_step cuda kernel
+    cuda_error_check(cudaEventRecord(kernel_start));
+    gpu_game_of_life_step<<<n_blocks, n_threads>>>(grid, updated_grid, n, m);
+    cuda_error_check(cudaEventRecord(kernel_stop));
+    cuda_error_check(cudaDeviceSynchronize());
+    cuda_error_check(cudaEventElapsedTime(&kernel_time_step, kernel_start, \
+                                          kernel_stop));
+    *kernel_time += kernel_time_step;
 
-   // swap current and updated grid
-   tmp = grid;
-   grid = updated_grid;
-   updated_grid = tmp;
- }
+    // swap current and updated grid
+    tmp = grid;
+    grid = updated_grid;
+    updated_grid = tmp;
+  }
 
   // copy final state to cpu memory
   int *final_state = (int *) malloc(sizeof(int) * n * m);
@@ -226,6 +226,9 @@ int main(int argc, char **argv)
   printf("Finished GOL in %f ms (%f%% of time in kernel)\n", elapsed_time, \
          (100.0 * kernel_time / elapsed_time));
   gpu_write_timing(opt, elapsed_time, kernel_time);
+
+  // visualise final state
+  visualise(VISUAL_ASCII, nsteps, final_state, n, m);
 
   // free cpu memory
   free(final_state);

@@ -82,40 +82,75 @@ __global__ void gpu_game_of_life_step(int *current_grid, int *next_grid, \
 
   If `nsteps` is positive, returns the last state reached.
 */
-int* gpu_game_of_life(const int *initial_state_gpu, int n, int m, int nsteps)
+int* gpu_game_of_life(const int *initial_state, int n, int m, int nsteps, \
+                      float *kernel_time)
 {
+  // cuda kernel parameters - uses least amount of blocks required
   const int n_threads = 1024;
   const int n_blocks = ((n * m - 1) / n_threads) + 1;
 
+  // allocate gpu memory
   int *grid;
   int *updated_grid;
 
   cuda_error_check(cudaMalloc(&grid, sizeof(int) * n * m));
   cuda_error_check(cudaMalloc(&updated_grid, sizeof(int) * n * m));
 
+  // copy initial state to gpu memory
+  cuda_error_check(cudaMemcpy(grid, initial_state, sizeof(int) * n * m, \
+                              cudaMemcpyHostToDevice));
+
+  // prepare kernel timing variables
+  *kernel_time = 0.0;
+
+  cudaEvent_t kernel_start, kernel_stop;
+  cuda_error_check(cudaEventCreate(&kernel_start));
+  cuda_error_check(cudaEventCreate(&kernel_stop));
+  float kernel_time_step = 0.0;
+
+  // initialise game_of_life loop
   int current_step = 0;
   int *tmp = NULL;
 
-  memcpy(grid, initial_state_gpu, sizeof(int) * n * m);
+  while (current_step != nsteps)
+ {
+   current_step++;
 
-  while(current_step != nsteps)
+   // Uncomment the following line if you want to print the state at every step
+   // visualise(opt->ivisualisetype, current_step, grid, n, m);
+
+   // execute game_of_life_step cuda kernel
+   cuda_error_check(cudaEventRecord(kernel_start));
+   gpu_game_of_life_step<<<n_blocks, n_threads>>>(grid, updated_grid, n, m);
+   cuda_error_check(cudaEventRecord(kernel_stop));
+   cuda_error_check(cudaEventElapsedTime(&kernel_time_step, kernel_start, \
+                                         kernel_stop));
+   *kernel_time += kernel_time_step;
+
+   // swap current and updated grid
+   tmp = grid;
+   grid = updated_grid;
+   updated_grid = tmp;
+ }
+
+  // copy final state to cpu memory
+  int *final_state = (int *) malloc(sizeof(int) * n * m);
+
+  if (!final_state)
   {
-    current_step++;
-
-    // Uncomment the following line if you want to print the state at every step
-    // visualise(opt->ivisualisetype, current_step, grid, n, m);
-
-    gpu_game_of_life_step<<<n_blocks, n_threads>>>(grid, updated_grid, n, m);
-
-    // swap current and updated grid
-    tmp = grid;
-    grid = updated_grid;
-    updated_grid = tmp;
+    printf("gpu_game_of_life: error while allocating memory.\n");
+    exit(1);
   }
 
-  cudaFree(updated_grid);
+  cuda_error_check(cudaMemcpy(final_state, grid, sizeof(int) * n * m, \
+                              cudaMemcpyDeviceToHost));
 
-  return grid;
+  // free gpu memory
+  cudaFree(updated_grid);
+  cudaFree(grid);
+  cudaFree(tmp);
+
+  return final_state;
 }
 
 // write timing data for gpu CUDA code to file
@@ -179,30 +214,9 @@ int main(int argc, char **argv)
   struct timeval start;
   start = init_time();
 
-  // allocate gpu memory
-  int *initial_state_gpu;
-  int *final_state_gpu;
-
-  cuda_error_check(cudaMalloc(&initial_state_gpu, sizeof(int) * n * m));
-  cuda_error_check(cudaMalloc(&final_state_gpu, sizeof(int) * n * m));
-
-  // copy initial state from CPU to GPU
-  cuda_error_check(cudaMemcpy(initial_state_gpu, initial_state,          \
-                              sizeof(int) * n * m, cudaMemcpyHostToDevice));
-
-  // initialise kernel timing
-  struct timeval kernel_start;
-  kernel_start = init_time();
-
-  // calculate final state
-  final_state_gpu = gpu_game_of_life(initial_state_gpu, n, m, nsteps);
-
-  // finalise kernel timing
-  float kernel_time = get_elapsed_time(kernel_start);
-
-  // copy final state from GPU to CPU
-  cuda_error_check(cudaMemcpy(final_state, final_state_gpu,          \
-                              sizeof(int) * n * m, cudaMemcpyDeviceToHost));
+  // calculate final state (and record kernel time)
+  float kernel_time = 0.0;
+  final_state = gpu_game_of_life(initial_state, n, m, nsteps, &kernel_time);
 
   // finalise timing and write ouput
   float elapsed_time = get_elapsed_time(start);
@@ -210,10 +224,6 @@ int main(int argc, char **argv)
   printf("Finished GOL in %f (%f%% kernel_time) ms\n", elapsed_time, \
          (100.0 * kernel_time / elapsed_time));
   gpu_write_timing(opt, elapsed_time, kernel_time);
-
-  // free gpu memory
-  cuda_error_check(cudaFree(initial_state_gpu));
-  cuda_error_check(cudaFree(final_state_gpu));
 
   // free cpu memory
   free(final_state);

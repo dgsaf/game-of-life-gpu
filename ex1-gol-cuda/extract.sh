@@ -18,30 +18,31 @@ for n in ${n_set}
 do
     echo "> extracting (cpu|cuda) timing for n=${n}"
 
-    # read timing file (ignore first two header lines)
-    cpu=$(sed '3q;d' "output/timing-cpu.n-${n}.m-${n}.nsteps-${nsteps}.txt")
-    gpu=$(sed '3q;d' "output/timing-gpu.n-${n}.m-${n}.nsteps-${nsteps}.txt")
+    # files to extract from
+    cpu_file="output/timing-cpu.n-${n}.m-${n}.nsteps-${nsteps}.txt"
+    gpu_file="output/timing-gpu-cuda.n-${n}.m-${n}.nsteps-${nsteps}.txt"
 
-    # pattern match for cpu_time
-    pattern="([0-9].+)"
-    if [[ $cpu =~ $pattern ]] ; then
-        cpu_time=${BASH_REMATCH[1]}
+    # extract cpu_time
+    if [ -f "${cpu_file}" ]
+    then
+        cpu_time=$(awk -F, 'FNR>2 { print $1 ; }' ${cpu_file})
     else
-        echo "failed to find cpu_time"
         cpu_time=""
+        echo "> ${cpu_file} does not exists"
     fi
 
-    # pattern match for gpu_time and kernel_time
-    pattern="([0-9].+),([0-9].+)"
-    if [[ $gpu =~ $pattern ]] ; then
-        gpu_time=${BASH_REMATCH[1]}
-        kernel_time=${BASH_REMATCH[2]}
+    # extract gpu_time, kernel_time
+    if [ -f "${gpu_file}" ]
+    then
+        gpu_time=$(awk -F, 'FNR>2 { print $1 ; }' ${gpu_file})
+        kernel_time=$(awk -F, 'FNR>2 { print $2 ; }' ${gpu_file})
     else
-        echo "failed to find gpu_time, kernel_time"
         gpu_time=""
         kernel_time=""
+        echo "> ${gpu_file} does not exists"
     fi
 
+    # if cpu_time, gpu_time both exist, calculate speedup
     if [ -z "${cpu_time}" ] || [ -z "${gpu_time}" ]
     then
         speedup=""

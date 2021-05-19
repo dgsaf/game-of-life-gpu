@@ -3,7 +3,7 @@
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:1
 #SBATCH --partition=gpuq
-#SBATCH --time=00:05:00
+#SBATCH --time=00:10:00
 #SBATCH --export=NONE
 
 # load modules

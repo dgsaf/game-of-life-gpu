@@ -6,8 +6,8 @@ n_set="1 2 4 8 16 32 64 128 256 512 1024 2048 4096 8192 16384"
 
 # performance file (with header)
 performance_file="output/performance.nsteps-${nsteps}.txt"
-printf "# n, cpu_time, gpu_time, speedup, kernel"
-printf "# [], [ms], [ms], [], [ms]"
+printf "# n, cpu_time, gpu_time, speedup, kernel_time \n" >> ${performance_file}
+printf "# [], [ms], [ms], [], [ms] \n" >> ${performance_file}
 
 # extract
 echo "GOL (cpu|cuda) extract"

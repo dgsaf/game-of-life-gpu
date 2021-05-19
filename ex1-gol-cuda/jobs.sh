@@ -1,7 +1,8 @@
 #!/bin/bash --login
 
 # load modules
-module load gcc/8.3.0 cuda/10.2
+module load gcc/8.3.0
+module load cuda/10.2
 
 # parameters
 nsteps="100"

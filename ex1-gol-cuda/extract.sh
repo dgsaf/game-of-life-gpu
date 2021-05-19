@@ -25,7 +25,7 @@ do
     # extract cpu_time
     if [ -f "${cpu_file}" ]
     then
-        cpu_time=$(awk -F, 'FNR>2 { print $1 ; }' ${cpu_file})
+        cpu_time=$(awk -F, 'FNR==3 { print $1 ; }' ${cpu_file})
     else
         cpu_time=""
         echo "> ${cpu_file} does not exists"
@@ -34,8 +34,8 @@ do
     # extract gpu_time, kernel_time
     if [ -f "${gpu_file}" ]
     then
-        gpu_time=$(awk -F, 'FNR>2 { print $1 ; }' ${gpu_file})
-        kernel_time=$(awk -F, 'FNR>2 { print $2 ; }' ${gpu_file})
+        gpu_time=$(awk -F, 'FNR==3 { print $1 ; }' ${gpu_file})
+        kernel_time=$(awk -F, 'FNR==3 { print $2 ; }' ${gpu_file})
     else
         gpu_time=""
         kernel_time=""

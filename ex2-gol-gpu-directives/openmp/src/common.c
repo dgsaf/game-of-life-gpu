@@ -97,22 +97,34 @@ struct timeval init_time(){
     gettimeofday(&curtime, NULL);
     return curtime;
 }
+
+// using get_elapsed_time from ex1-gol-cuda/src/common.c to standardise time
+// presentation
+/* /// get the elapsed time relative to start, return current wall time */
+/* struct timeval get_elapsed_time(struct timeval start){ */
+/*   struct timeval curtime, delta; */
+/*   gettimeofday(&curtime, NULL); */
+/*   delta.tv_sec = curtime.tv_sec - start.tv_sec; */
+/*   delta.tv_usec = curtime.tv_usec - start.tv_usec; */
+/*   double deltas = delta.tv_sec+delta.tv_usec/1e6; */
+/*   printf("Elapsed time %f s\n", deltas); */
+/*   return curtime; */
+/* } */
+//
 /// get the elapsed time relative to start, return current wall time
-struct timeval get_elapsed_time(struct timeval start){
-    struct timeval curtime, delta;
-    gettimeofday(&curtime, NULL);
-    delta.tv_sec = curtime.tv_sec - start.tv_sec;
-    delta.tv_usec = curtime.tv_usec - start.tv_usec;
-    double deltas = delta.tv_sec+delta.tv_usec/1e6;
-    printf("Elapsed time %f s\n", deltas);
-    return curtime;
+float get_elapsed_time(struct timeval start){
+  struct timeval curtime, delta;
+  gettimeofday(&curtime, NULL);
+  timersub(&curtime, &start, &delta);
+  float elapsed = delta.tv_sec * 1000.0f + delta.tv_usec / 1000.0f;
+  return elapsed;
 }
 
 /// UI
 void getinput(int argc, char **argv, struct Options *opt){
   if(argc < 3){
-      printf("Usage: %s <grid height> <grid width> [<nsteps> <IC type> <Visualisation type> <Rule type> <Neighbour type> <Boundary type> <stats filename> ]\n", argv[0]);
-      exit(0);
+    printf("Usage: %s <grid height> <grid width> [<nsteps> <IC type> <Visualisation type> <Rule type> <Neighbour type> <Boundary type> <stats filename> ]\n", argv[0]);
+    exit(0);
   }
   // grid size
   char statsfilename[2000] = "GOL-stats.txt";

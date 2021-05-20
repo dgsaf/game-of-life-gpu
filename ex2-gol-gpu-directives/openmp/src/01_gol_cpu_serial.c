@@ -152,13 +152,14 @@ int main(int argc, char **argv)
   generate_IC(opt->iictype, grid, n, m);
 
   // initialise timing
-  struct timeval start, steptime;
+  struct timeval start, step_start;
+  float step_time;
   start = init_time();
 
   // calculate final game_of_life state
   while (current_step != nsteps)
   {
-    steptime = init_time();
+    step_start = init_time();
 
     game_of_life(opt, grid, updated_grid, n, m);
 
@@ -169,7 +170,7 @@ int main(int argc, char **argv)
 
     current_step++;
 
-    get_elapsed_time(steptime);
+    step_time = get_elapsed_time(step_start);
   }
 
   // finalise timing and write output

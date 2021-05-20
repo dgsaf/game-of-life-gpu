@@ -165,7 +165,8 @@ int main(int argc, char **argv)
   generate_IC(opt->iictype, grid, n, m);
 
   // initialise timing
-  struct timeval start, steptime;
+  struct timeval start, step_start;
+  float step_time;
   start = init_time();
   float kernel_time = 0.0;
 
@@ -180,12 +181,12 @@ int main(int argc, char **argv)
   // calculate final game_of_life state
   while (current_step != nsteps)
   {
-    steptime = init_time();
+    step_start = init_time();
 
     // perform game_of_life step with grid variables in gpu memory
     game_of_life(opt, grid, updated_grid, n, m);
 
-    kernel_time += get_elapsed_time(steptime);
+    kernel_time += get_elapsed_time(step_start);
 
     // swap current and updated grid
     tmp = grid;
@@ -194,7 +195,7 @@ int main(int argc, char **argv)
 
     current_step++;
 
-    get_elapsed_time(steptime);
+    step_time = get_elapsed_time(step_start);
   }
 
   // omp - retrieve grid variables from gpu memory to cpu memory

@@ -156,7 +156,7 @@ int main(int argc, char **argv)
   start = init_time();
 
   // calculate final game_of_life state
-  while(current_step != nsteps)
+  while (current_step != nsteps)
   {
     steptime = init_time();
 

@@ -3,8 +3,9 @@
 void game_of_life(struct Options *opt, int *current_grid, int *next_grid, \
                   int n, int m)
 {
-  int neighbours;
+  int i, j;
   int n_i[8], n_j[8];
+  int neighbours;
 
   // omp - gpu parallel loop
   // - `target` defines a task to perform on the gpu
@@ -15,11 +16,11 @@ void game_of_life(struct Options *opt, int *current_grid, int *next_grid, \
   // - `collapse(2)` collapses the two-nested for loops into a single for loop
 #pragma omp target                              \
   parallel for                                  \
-  private(n_i, n_j, neighbours)                 \
+  private(i, j, n_i, n_j, neighbours)           \
   collapse(2)
-  for (int i = 0; i < n; i++)
+  for (i = 0; i < n; i++)
   {
-    for (int j = 0; j < m; j++)
+    for (j = 0; j < m; j++)
     {
       // count the number of neighbours, clockwise around the current cell.
       neighbours = 0;

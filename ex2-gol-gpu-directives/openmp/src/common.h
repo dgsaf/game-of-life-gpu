@@ -79,8 +79,10 @@ void generate_rand_IC(int *grid, int n, int m);
 
 /// get some basic timing info
 struct timeval init_time();
+// /// get the elapsed time relative to start, return current wall time
+// struct timeval get_elapsed_time(struct timeval start);
 /// get the elapsed time relative to start, return current wall time
-struct timeval get_elapsed_time(struct timeval start);
+float get_elapsed_time(struct timeval start);
 
 /// GOL prototype
 void game_of_life(struct Options *opt,

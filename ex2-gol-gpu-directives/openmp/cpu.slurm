@@ -1,4 +1,6 @@
 #!/bin/bash --login
+#SBATCH --account=courses0100
+#SBATCH --reservation=courses0100
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --gres=gpu:1

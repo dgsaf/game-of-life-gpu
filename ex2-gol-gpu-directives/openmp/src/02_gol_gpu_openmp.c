@@ -13,9 +13,9 @@ void game_of_life(struct Options *opt, int *current_grid, int *next_grid, \
   // - `n_i`, `n_j`, `neighbours` are private to each thread, since they are
   //   local to each grid cell
   // - `collapse(2)` collapses the two-nested for loops into a single for loop
-#pragma omp target               \
-  teams distribute parallel for  \
-  private(n_i, n_j, neighbours)  \
+#pragma omp target                              \
+  parallel for                                  \
+  private(n_i, n_j, neighbours)                 \
   collapse(2)
   for (int i = 0; i < n; i++)
   {

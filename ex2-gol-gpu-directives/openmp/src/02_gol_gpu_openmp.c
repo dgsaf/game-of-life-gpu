@@ -15,9 +15,9 @@ void game_of_life(struct Options *opt, int *current_grid, int *next_grid, \
   // - `i`, `j`, `n_i`, `n_j`, `neighbours` are private to each thread, since
   //   they are local to each grid cell
   // - `collapse(2)` collapses the two-nested for loops into a single for loop
-#pragma omp target                              \
-  parallel for                                  \
-  private(i, j, n_i, n_j, neighbours)           \
+#pragma omp target                               \
+  teams distribute parallel for                  \
+  private(i, j, n_i, n_j, neighbours)            \
   collapse(2)
   for (i = 0; i < n; i++)
   {
@@ -187,7 +187,10 @@ int main(int argc, char **argv)
     step_start = init_time();
 
     // perform game_of_life step with grid variables in gpu memory
-    game_of_life(opt, grid, updated_grid, n, m);
+#pragma omp target
+    {
+      game_of_life(opt, grid, updated_grid, n, m);
+    }
 
     kernel_time += get_elapsed_time(step_start);
 

@@ -1,5 +1,6 @@
 #include "common.h"
 
+#pragma omp declare target
 void game_of_life(struct Options *opt, int *current_grid, int *next_grid, \
                   int n, int m)
 {
@@ -11,8 +12,8 @@ void game_of_life(struct Options *opt, int *current_grid, int *next_grid, \
   // - `target` defines a task to perform on the gpu
   // - `teams distribute parallel for` distributes the parallel for loop across
   //    the gpu threads
-  // - `n_i`, `n_j`, `neighbours` are private to each thread, since they are
-  //   local to each grid cell
+  // - `i`, `j`, `n_i`, `n_j`, `neighbours` are private to each thread, since
+  //   they are local to each grid cell
   // - `collapse(2)` collapses the two-nested for loops into a single for loop
 #pragma omp target                              \
   parallel for                                  \
@@ -66,6 +67,7 @@ void game_of_life(struct Options *opt, int *current_grid, int *next_grid, \
     }
   }
 }
+#pragma omp end declare target
 
 void game_of_life_stats(struct Options *opt, int step, int *current_grid)
 {

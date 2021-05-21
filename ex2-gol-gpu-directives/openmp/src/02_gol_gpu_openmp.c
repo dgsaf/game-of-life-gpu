@@ -72,9 +72,9 @@ int game_of_life_next_state(int current_state, int neighbours)
 // - An atomic function has been introduced for determining the next state of a
 //   cell, based on its current state and the number of living neighbours,
 //   `game_of_life_next_state()`.
-// - The argument `opt` has been removed as it went unused.
 #pragma omp declare target
-void game_of_life(int *current_grid, int *next_grid, int n, int m)
+void game_of_life(struct Options *opt, int *current_grid, int *next_grid, \
+                  int n, int m)
 {
   int i, j;
   int neighbours;
@@ -88,7 +88,7 @@ void game_of_life(int *current_grid, int *next_grid, int n, int m)
   // - `collapse(2)` collapses the two-nested for loops into a single for loop
 #pragma omp target                               \
   teams distribute parallel for                  \
-  private(i, j, n_i, n_j, neighbours)            \
+  private(i, j, neighbours)                      \
   collapse(2)
   for (i = 0; i < n; i++)
   {
@@ -241,7 +241,7 @@ int main(int argc, char **argv)
                                                           neighbours);
         }
       }
-      // game_of_life(grid, updated_grid, n, m);
+      // game_of_life(opt, grid, updated_grid, n, m);
 
       // swap current and updated grid
       tmp = grid;

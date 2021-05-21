@@ -76,9 +76,9 @@ int game_of_life_next_state(int current_state, int neighbours)
 void game_of_life(struct Options *opt, int *current_grid, int *next_grid, \
                   int n, int m)
 {
-  for (i = 0; i < n; i++)
+  for (int i = 0; i < n; i++)
   {
-    for (j = 0; j < m; j++)
+    for (int j = 0; j < m; j++)
     {
       int n_i[8], n_j[8];
       int neighbours;
@@ -255,7 +255,7 @@ int main(int argc, char **argv)
     printf("> before loop : %f ms\n", current_step, get_elapsed_time(kernel_start));
 
     // perform game_of_life step (in-line for debugging)
-#pragma omp teams distribute parallel for collapse(2) schedule(static, 1)
+#pragma omp target teams distribute parallel for collapse(2) schedule(static, 1)
     for (int i = 0; i < n; i++)
     {
       for (int j = 0; j < m; j++)

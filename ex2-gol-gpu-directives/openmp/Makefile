@@ -58,16 +58,11 @@ bin/01_gol_cpu_serial_fort : src/01_gol_cpu_serial_fort.f90 obj/common_fort.o
 	$(FORT) $(PREPROCESSFLAGS) $(COMMONFLAGS) $(FFLAGS) -c src/01_gol_cpu_serial_fort.f90 -o obj/01_gol_cpu_serial_fort.o
 	$(FORT) $(COMMONFLAGS) $(FFLAGS) -o bin/01_gol_cpu_serial_fort obj/01_gol_cpu_serial_fort.o obj/common_fort.o
 
-# does not compile with nvcc, removing
-# bin/02_gol_gpu_openmp: src/02_gol_gpu_openmp.c obj/common.o
-# 	$(CC) $(COMMONFLAGS) $(OPENMPFLAGS) $(CFLAGS) -c src/02_gol_gpu_openmp.c -o obj/02_gol_gpu_openmp.o
-# 	$(CC) $(COMMONFLAGS) $(OPENMPFLAGS) $(CFLAGS) -o bin/02_gol_gpu_openmp
-# 	obj/02_gol_gpu_openmp.o obj/common.o
-
+does not compile with nvcc, removing
 bin/02_gol_gpu_openmp: src/02_gol_gpu_openmp.c obj/common.o
-	nvcc $(COMMONFLAGS) $(OPENMPFLAGS) $(CFLAGS) -c src/02_gol_gpu_openmp.c -o obj/02_gol_gpu_openmp.o
-	nvcc $(COMMONFLAGS) $(OPENMPFLAGS) $(CFLAGS) -o bin/02_gol_gpu_openmp \
-	-o obj/02_gol_gpu_openmp.o obj/common.o
+	$(CC) $(COMMONFLAGS) $(OPENMPFLAGS) $(CFLAGS) -c src/02_gol_gpu_openmp.c -o obj/02_gol_gpu_openmp.o
+	$(CC) $(COMMONFLAGS) $(OPENMPFLAGS) $(CFLAGS) -o bin/02_gol_gpu_openmp
+	obj/02_gol_gpu_openmp.o obj/common.o
 
 bin/02_gol_gpu_openmp_fort: src/02_gol_gpu_openmp_fort.f90 obj/common_fort.o
 	$(FORT) $(PREPROCESSFLAGS) $(COMMONFLAGS) $(OPENMPFLAGS) $(FFLAGS) -c src/02_gol_gpu_openmp_fort.f90 -o obj/02_gol_gpu_openmp_fort.o

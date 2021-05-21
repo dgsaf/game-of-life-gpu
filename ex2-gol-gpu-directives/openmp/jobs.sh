@@ -1,7 +1,7 @@
 #!/bin/bash --login
 
 # load modules
-module load gcc/8.3.0
+module load gcc/9.2.0
 module load cuda
 module load cascadelake
 

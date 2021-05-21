@@ -10,7 +10,7 @@
 #SBATCH --mem=1G
 
 # load modules
-module load gcc/8.3.0
+module load gcc/9.2.0
 module load cuda
 module load cascadelake
 
@@ -22,5 +22,5 @@ if [ -z "${n}" ] || [ -z "${m}" ] || [ -z "${nsteps}" ]
 then
     echo "cpu.slurm: missing arguments"
 else
-    srun bin/01_gol_cpu_serial ${n} ${m} ${nsteps}
+    srun --export=all bin/01_gol_cpu_serial ${n} ${m} ${nsteps}
 fi

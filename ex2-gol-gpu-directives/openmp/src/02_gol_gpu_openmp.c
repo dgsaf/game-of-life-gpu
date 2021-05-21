@@ -223,19 +223,19 @@ int main(int argc, char **argv)
     {
       // perform game_of_life step (in-line for debugging)
       int *tmp = NULL;
-      int i, j;
-      int n_i[8], n_j[8];
-      int neighbours = 0;
 
 #pragma omp                                     \
   teams distribute parallel for                 \
   collapse(2)                                   \
   schedule(static, 1)                           \
-  private(i, j, n_i, n_j, neighbours)
-      for (i = 0; i < n; i++)
+  firstprivate(i, j, n_i, n_j, neighbours)
+      for (int i = 0; i < n; i++)
       {
-        for (j = 0; j < m; j++)
+        for (int j = 0; j < m; j++)
         {
+          int n_i[8], n_j[8];
+          int neighbours;
+
           // index the neighbourhood around current cell
           n_i[0] = i - 1; n_j[0] = j - 1;
           n_i[1] = i - 1; n_j[1] = j;
@@ -247,6 +247,8 @@ int main(int argc, char **argv)
           n_i[7] = i;     n_j[7] = j - 1;
 
           // count the number of living neighbours
+          neighbours = 0;
+
           if (n_i[0] >= 0 && n_j[0] >= 0                            \
               && grid[n_i[0] * m + n_j[0]] == ALIVE) neighbours++;
           if (n_i[1] >= 0                                           \

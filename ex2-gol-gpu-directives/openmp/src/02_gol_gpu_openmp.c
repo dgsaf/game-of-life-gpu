@@ -221,7 +221,7 @@ int main(int argc, char **argv)
     kernel_start = init_time();
 
     // perform game_of_life step (in-line for debugging)
-#pragma omp                                     \
+#pragma omp target                              \
   teams distribute parallel for                 \
   collapse(2)                                   \
   schedule(static, 1)

@@ -222,8 +222,26 @@ int main(int argc, char **argv)
     // perform the following in gpu memory
 #pragma omp target
     {
-      // perform game_of_life step
-      game_of_life(grid, updated_grid, n, m);
+
+      // perform game_of_life step (in-line for debugging)
+      int i, j;
+      int neighbours;
+
+#pragma omp                                     \
+  teams distribute parallel for                 \
+  private(i, j, neighbours)                     \
+  collapse(2)
+      for (i = 0; i < n; i++)
+      {
+        for (j = 0; j < m; j++)
+        {
+          neighbours = game_of_life_neighbours(grid, n, m, i, j);
+
+          updated_grid[i*m + j] = game_of_life_next_state(grid[i*m + j], \
+                                                          neighbours);
+        }
+      }
+      // game_of_life(grid, updated_grid, n, m);
 
       // swap current and updated grid
       tmp = grid;

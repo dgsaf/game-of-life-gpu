@@ -97,34 +97,34 @@ void game_of_life(struct Options *opt, int *current_grid, int *next_grid, \
       neighbours = 0;
 
       if (n_i[0] >= 0 && n_j[0] >= 0                            \
-          && grid[n_i[0] * m + n_j[0]] == ALIVE) neighbours++;
+          && current_grid[n_i[0] * m + n_j[0]] == ALIVE) neighbours++;
       if (n_i[1] >= 0                                           \
-          && grid[n_i[1] * m + n_j[1]] == ALIVE) neighbours++;
+          && current_grid[n_i[1] * m + n_j[1]] == ALIVE) neighbours++;
       if (n_i[2] >= 0 && n_j[2] < m                             \
-          && grid[n_i[2] * m + n_j[2]] == ALIVE) neighbours++;
+          && current_grid[n_i[2] * m + n_j[2]] == ALIVE) neighbours++;
       if (n_j[3] < m                                            \
-          && grid[n_i[3] * m + n_j[3]] == ALIVE) neighbours++;
+          && current_grid[n_i[3] * m + n_j[3]] == ALIVE) neighbours++;
       if (n_i[4] < n && n_j[4] < m                              \
-          && grid[n_i[4] * m + n_j[4]] == ALIVE) neighbours++;
+          && current_grid[n_i[4] * m + n_j[4]] == ALIVE) neighbours++;
       if (n_i[5] < n                                            \
-          && grid[n_i[5] * m + n_j[5]] == ALIVE) neighbours++;
+          && current_grid[n_i[5] * m + n_j[5]] == ALIVE) neighbours++;
       if (n_i[6] < n && n_j[6] >= 0                             \
-          && grid[n_i[6] * m + n_j[6]] == ALIVE) neighbours++;
+          && current_grid[n_i[6] * m + n_j[6]] == ALIVE) neighbours++;
       if (n_j[7] >= 0                                           \
-          && grid[n_i[7] * m + n_j[7]] == ALIVE) neighbours++;
+          && current_grid[n_i[7] * m + n_j[7]] == ALIVE) neighbours++;
 
       // update state
-      if (grid[i*m + j] == ALIVE && (neighbours == 2 || neighbours == 3))
+      if (current_grid[i*m + j] == ALIVE && (neighbours == 2 || neighbours == 3))
       {
-        updated_grid[i*m + j] = ALIVE;
+        next_grid[i*m + j] = ALIVE;
       }
-      else if (grid[i*m + j] == DEAD && neighbours == 3)
+      else if (current_grid[i*m + j] == DEAD && neighbours == 3)
       {
-        updated_grid[i*m + j] = ALIVE;
+        next_grid[i*m + j] = ALIVE;
       }
       else
       {
-        updated_grid[i*m + j] = DEAD;
+        next_grid[i*m + j] = DEAD;
       }
     }
   }
@@ -260,10 +260,10 @@ int main(int argc, char **argv)
     {
       for (int j = 0; j < m; j++)
       {
-        int neighbours = game_of_life_neighbours(current_grid, n, m, i, j);
+        int neighbours = game_of_life_neighbours(grid, n, m, i, j);
 
-        next_grid[i*m + j] = game_of_life_next_state(current_grid[i*m + j], \
-                                                     neighbours);
+        updated_grid[i*m + j] = game_of_life_next_state(grid[i*m + j], \
+                                                        neighbours);
       }
     }
     // game_of_life(opt, grid, updated_grid, n, m);

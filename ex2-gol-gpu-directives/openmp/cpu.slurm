@@ -11,6 +11,8 @@
 
 # load modules
 module load gcc/8.3.0
+module load cuda
+module load cascadelake
 
 # make binary
 # make bin/01_gol_cpu_serial

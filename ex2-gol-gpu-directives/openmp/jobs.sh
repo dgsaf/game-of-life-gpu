@@ -2,6 +2,8 @@
 
 # load modules
 module load gcc/8.3.0
+module load cuda
+module load cascadelake
 
 # make clean (*.slurm files will compile)
 make clean

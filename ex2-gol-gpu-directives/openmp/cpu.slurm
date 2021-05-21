@@ -16,7 +16,7 @@ module load cascadelake
 
 # make binary
 # make bin/01_gol_cpu_serial
-srun --export=all -u -n 1 make clean
+# srun --export=all -u -n 1 make clean
 srun --export=all -u -n 1 make bin/01_gol_cpu_serial
 
 # check if `n`, `m`, `nsteps` have been supplied to this script before executing

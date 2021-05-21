@@ -197,7 +197,6 @@ int main(int argc, char **argv)
   }
 
   int current_step = 0;
-  int *tmp = NULL;
 
   generate_IC(opt->iictype, grid, n, m);
 
@@ -212,9 +211,10 @@ int main(int argc, char **argv)
   // - `enter data` defines a transfer of cpu memory to gpu memory
   // - `map(to:*)` moves `grid` and `updated_grid` from the cpu memory into the
   //   gpu memory
-#pragma omp target enter data map(to: grid[0:n*m], updated_grid[0:n*m])
+  //pragma omp target enter data map(to: grid[0:n*m], updated_grid[0:n*m])
 
   // calculate final game_of_life state
+#pragma omp target data map(tofrom: grid[0:n*m], updated_grid[0:n*m])
   while (current_step != nsteps)
   {
     kernel_start = init_time();
@@ -224,15 +224,14 @@ int main(int argc, char **argv)
     {
 
       // perform game_of_life step (in-line for debugging)
+      int *tmp = NULL;
       int i, j;
       int neighbours;
 
-#pragma omp                                     \
-  teams distribute parallel for                 \
-  private(i, j, neighbours)                     \
-  collapse(2)
+#pragma omp target teams distribute private(i, j, neighbours)
       for (i = 0; i < n; i++)
       {
+#pragma omp parallel for private(i, j, neighbours)
         for (j = 0; j < m; j++)
         {
           neighbours = game_of_life_neighbours(grid, n, m, i, j);
@@ -259,7 +258,7 @@ int main(int argc, char **argv)
   // - `exit data` defines a transfer of gpu memory to cpu memory
   // - `map(from:*)` moves `grid` and `updated_grid` from the gpu memory into
   //   the cpu memory
-#pragma omp target exit data map(from: grid[0:n*m], updated_grid[0:n*m])
+  //pragma omp target exit data map(from: grid[0:n*m], updated_grid[0:n*m])
 
   // finalise timing and write output
   float elapsed_time = get_elapsed_time(start);

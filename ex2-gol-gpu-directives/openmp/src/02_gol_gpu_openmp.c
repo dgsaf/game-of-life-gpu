@@ -1,4 +1,5 @@
 #include "common.h"
+#include <omp.h>
 
 #pragma omp declare target
 void game_of_life(struct Options *opt, int *current_grid, int *next_grid, \
@@ -162,6 +163,9 @@ int main(int argc, char **argv)
     return -1;
   }
 
+  int current_step = 0;
+  int *tmp = NULL;
+
   generate_IC(opt->iictype, grid, n, m);
 
   // initialise timing
@@ -177,17 +181,14 @@ int main(int argc, char **argv)
   //   gpu memory
 #pragma omp target enter data map(to: grid[0:n*m], updated_grid[0:n*m])
 
-  // perform the following in gpu memory
-#pragma omp target
+  // calculate final game_of_life state
+  while (current_step != nsteps)
   {
-    int current_step = 0;
-    int *tmp = NULL;
+    kernel_start = init_time();
 
-    // calculate final game_of_life state
-    while (current_step != nsteps)
+    // perform the following in gpu memory
+#pragma omp target
     {
-      kernel_start = init_time();
-
       // perform game_of_life step
       game_of_life(opt, grid, updated_grid, n, m);
 
@@ -195,11 +196,11 @@ int main(int argc, char **argv)
       tmp = grid;
       grid = updated_grid;
       updated_grid = tmp;
-
-      kernel_time += get_elapsed_time(kernel_start);
-
-      current_step++;
     }
+
+    kernel_time += get_elapsed_time(kernel_start);
+
+    current_step++;
   }
 
   // omp - retrieve grid variables from gpu memory to cpu memory

@@ -211,95 +211,99 @@ int main(int argc, char **argv)
   // - `enter data` defines a transfer of cpu memory to gpu memory
   // - `map(to:*)` moves `grid` and `updated_grid` from the cpu memory into the
   //   gpu memory
-#pragma omp target enter data map(to: grid[0:n*m], updated_grid[0:n*m])
+  //#pragma omp target enter data map(to: grid[0:n*m], updated_grid[0:n*m])
 
   // calculate final game_of_life state
+#pragma omp target data map(tofrom: grid[0:n*m], updated_grid[0:n*m])
   while (current_step != nsteps)
   {
+#pragma omp single
     kernel_start = init_time();
 
-    // perform the following in gpu memory
-#pragma omp target
-    {
-      // perform game_of_life step (in-line for debugging)
-      int *tmp = NULL;
-
+    // perform game_of_life step (in-line for debugging)
 #pragma omp                                     \
   teams distribute parallel for                 \
   collapse(2)                                   \
-  schedule(static, 1)                           \
-  firstprivate(i, j, n_i, n_j, neighbours)
-      for (int i = 0; i < n; i++)
+  schedule(static, 1)
+    for (int i = 0; i < n; i++)
+    {
+      for (int j = 0; j < m; j++)
       {
-        for (int j = 0; j < m; j++)
+        int n_i[8], n_j[8];
+        int neighbours;
+
+        // index the neighbourhood around current cell
+        n_i[0] = i - 1; n_j[0] = j - 1;
+        n_i[1] = i - 1; n_j[1] = j;
+        n_i[2] = i - 1; n_j[2] = j + 1;
+        n_i[3] = i;     n_j[3] = j + 1;
+        n_i[4] = i + 1; n_j[4] = j + 1;
+        n_i[5] = i + 1; n_j[5] = j;
+        n_i[6] = i + 1; n_j[6] = j - 1;
+        n_i[7] = i;     n_j[7] = j - 1;
+
+        // count the number of living neighbours
+        neighbours = 0;
+
+        if (n_i[0] >= 0 && n_j[0] >= 0                            \
+            && grid[n_i[0] * m + n_j[0]] == ALIVE) neighbours++;
+        if (n_i[1] >= 0                                           \
+            && grid[n_i[1] * m + n_j[1]] == ALIVE) neighbours++;
+        if (n_i[2] >= 0 && n_j[2] < m                             \
+            && grid[n_i[2] * m + n_j[2]] == ALIVE) neighbours++;
+        if (n_j[3] < m                                            \
+            && grid[n_i[3] * m + n_j[3]] == ALIVE) neighbours++;
+        if (n_i[4] < n && n_j[4] < m                              \
+            && grid[n_i[4] * m + n_j[4]] == ALIVE) neighbours++;
+        if (n_i[5] < n                                            \
+            && grid[n_i[5] * m + n_j[5]] == ALIVE) neighbours++;
+        if (n_i[6] < n && n_j[6] >= 0                             \
+            && grid[n_i[6] * m + n_j[6]] == ALIVE) neighbours++;
+        if (n_j[7] >= 0                                           \
+            && grid[n_i[7] * m + n_j[7]] == ALIVE) neighbours++;
+
+        // update state
+        if (grid[i*m + j] == ALIVE && (neighbours == 2 || neighbours == 3))
         {
-          int n_i[8], n_j[8];
-          int neighbours;
-
-          // index the neighbourhood around current cell
-          n_i[0] = i - 1; n_j[0] = j - 1;
-          n_i[1] = i - 1; n_j[1] = j;
-          n_i[2] = i - 1; n_j[2] = j + 1;
-          n_i[3] = i;     n_j[3] = j + 1;
-          n_i[4] = i + 1; n_j[4] = j + 1;
-          n_i[5] = i + 1; n_j[5] = j;
-          n_i[6] = i + 1; n_j[6] = j - 1;
-          n_i[7] = i;     n_j[7] = j - 1;
-
-          // count the number of living neighbours
-          neighbours = 0;
-
-          if (n_i[0] >= 0 && n_j[0] >= 0                            \
-              && grid[n_i[0] * m + n_j[0]] == ALIVE) neighbours++;
-          if (n_i[1] >= 0                                           \
-              && grid[n_i[1] * m + n_j[1]] == ALIVE) neighbours++;
-          if (n_i[2] >= 0 && n_j[2] < m                             \
-              && grid[n_i[2] * m + n_j[2]] == ALIVE) neighbours++;
-          if (n_j[3] < m                                            \
-              && grid[n_i[3] * m + n_j[3]] == ALIVE) neighbours++;
-          if (n_i[4] < n && n_j[4] < m                              \
-              && grid[n_i[4] * m + n_j[4]] == ALIVE) neighbours++;
-          if (n_i[5] < n                                            \
-              && grid[n_i[5] * m + n_j[5]] == ALIVE) neighbours++;
-          if (n_i[6] < n && n_j[6] >= 0                             \
-              && grid[n_i[6] * m + n_j[6]] == ALIVE) neighbours++;
-          if (n_j[7] >= 0                                           \
-              && grid[n_i[7] * m + n_j[7]] == ALIVE) neighbours++;
-
-          // update state
-          if (grid[i*m + j] == ALIVE && (neighbours == 2 || neighbours == 3))
-          {
-            updated_grid[i*m + j] = ALIVE;
-          }
-          else if (grid[i*m + j] == DEAD && neighbours == 3)
-          {
-            updated_grid[i*m + j] = ALIVE;
-          }
-          else
-          {
-            updated_grid[i*m + j] = DEAD;
-          }
+          updated_grid[i*m + j] = ALIVE;
+        }
+        else if (grid[i*m + j] == DEAD && neighbours == 3)
+        {
+          updated_grid[i*m + j] = ALIVE;
+        }
+        else
+        {
+          updated_grid[i*m + j] = DEAD;
         }
       }
-      // game_of_life(opt, grid, updated_grid, n, m);
+    }
+    // game_of_life(opt, grid, updated_grid, n, m);
 
-      // swap current and updated grid
+    // wait for all cells to be updated
+#pragma omp barrier
+
+    // swap current and updated grid
+#pragma omp single
+    {
+      int *tmp = NULL;
       tmp = grid;
       grid = updated_grid;
       updated_grid = tmp;
     }
 
+#pragma omp single
     kernel_time += get_elapsed_time(kernel_start);
 
+#pragma omp single
     current_step++;
-  }
+}
 
-  // omp - retrieve grid variables from gpu memory to cpu memory
+// omp - retrieve grid variables from gpu memory to cpu memory
   // - `target` defines a task to perform on the gpu
   // - `exit data` defines a transfer of gpu memory to cpu memory
   // - `map(from:*)` moves `grid` and `updated_grid` from the gpu memory into
   //   the cpu memory
-#pragma omp target exit data map(from: grid[0:n*m], updated_grid[0:n*m])
+  //pragma omp target exit data map(from: grid[0:n*m], updated_grid[0:n*m])
 
   // finalise timing and write output
   float elapsed_time = get_elapsed_time(start);

@@ -220,11 +220,15 @@ int main(int argc, char **argv)
 #pragma omp single
     kernel_start = init_time();
 
+#pragma omp single
+    printf("step %i : %f ms\n", current_step, get_elapsed_time(start));
+
+#pragma omp single
+    printf("> before loop : %f ms\n", current_step, get_elapsed_time(kernel_start));
+
     // perform game_of_life step (in-line for debugging)
-#pragma omp target                              \
-  teams distribute parallel for                 \
-  collapse(2)                                   \
-  schedule(static, 1)
+#pragma omp target
+#pragma omp teams distribute parallel for collapse(2) schedule(static, 1)
     for (int i = 0; i < n; i++)
     {
       for (int j = 0; j < m; j++)
@@ -278,9 +282,17 @@ int main(int argc, char **argv)
       }
     }
     // game_of_life(opt, grid, updated_grid, n, m);
+#pragma omp single
+    printf("> first : %f ms\n", current_step, get_elapsed_time(kernel_start));
 
     // wait for all cells to be updated
 #pragma omp barrier
+
+#pragma omp single
+    printf("> last : %f ms\n", current_step, get_elapsed_time(kernel_start));
+
+#pragma omp single
+    kernel_time += get_elapsed_time(kernel_start);
 
     // swap current and updated grid
 #pragma omp single
@@ -292,13 +304,13 @@ int main(int argc, char **argv)
     }
 
 #pragma omp single
-    kernel_time += get_elapsed_time(kernel_start);
+    printf("> grids swapped : %f ms\n", current_step, get_elapsed_time(kernel_start));
 
 #pragma omp single
     current_step++;
-}
+  }
 
-// omp - retrieve grid variables from gpu memory to cpu memory
+  // omp - retrieve grid variables from gpu memory to cpu memory
   // - `target` defines a task to perform on the gpu
   // - `exit data` defines a transfer of gpu memory to cpu memory
   // - `map(from:*)` moves `grid` and `updated_grid` from the gpu memory into

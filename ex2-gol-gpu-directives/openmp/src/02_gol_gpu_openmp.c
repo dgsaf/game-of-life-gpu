@@ -239,10 +239,10 @@ int main(int argc, char **argv)
   // - `enter data` defines a transfer of cpu memory to gpu memory
   // - `map(to:*)` moves `grid` and `updated_grid` from the cpu memory into the
   //   gpu memory
-  //#pragma omp target enter data map(to:grid[0:n*m],updated_grid[0:n*m])
+  #pragma omp target enter data map(to:grid[0:n*m],updated_grid[0:n*m])
 
   // calculate final game_of_life state
-#pragma omp target data map(tofrom:grid[0:n*m],updated_grid[0:n*m])
+  //#pragma omp target data map(tofrom:grid[0:n*m],updated_grid[0:n*m])
   while (current_step != nsteps)
   {
 #pragma omp single
@@ -304,7 +304,7 @@ int main(int argc, char **argv)
   // - `exit data` defines a transfer of gpu memory to cpu memory
   // - `map(from:*)` moves `grid` and `updated_grid` from the gpu memory into
   //   the cpu memory
-  //#pragma omp target exit data map(from:grid[0:n*m],updated_grid[0:n*m])
+  #pragma omp target exit data map(from:grid[0:n*m],updated_grid[0:n*m])
 
   // finalise timing and write output
   float elapsed_time = get_elapsed_time(start);

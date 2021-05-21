@@ -226,10 +226,13 @@ int main(int argc, char **argv)
       int i, j;
       int neighbours;
 
-#pragma omp teams distribute private(i, j, neighbours)
+#pragma omp                                     \
+  teams distribute parallel for                 \
+  collapse(2)                                   \
+  schedule(static, 1)                           \
+  private(i, j, neighbours)
       for (i = 0; i < n; i++)
       {
-#pragma omp parallel for private(i, j, neighbours) schedule(static)
         for (j = 0; j < m; j++)
         {
           neighbours = game_of_life_neighbours(grid, n, m, i, j);

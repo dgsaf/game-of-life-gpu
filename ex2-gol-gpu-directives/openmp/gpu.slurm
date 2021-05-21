@@ -23,6 +23,8 @@ if [ -z "${n}" ] || [ -z "${m}" ] || [ -z "${nsteps}" ]
 then
     echo "gpu.slurm: missing arguments"
 else
-    # srun bin/02_gol_gpu_openmp ${n} ${m} ${nsteps}
-    srun --export=all -u -n 1 nvprof bin/02_gol_gpu_openmp ${n} ${m} ${nsteps}
+    srun bin/02_gol_gpu_openmp ${n} ${m} ${nsteps}
+
+    # for profiling run
+    # srun --export=all -u -n 1 nvprof bin/02_gol_gpu_openmp ${n} ${m} ${nsteps}
 fi

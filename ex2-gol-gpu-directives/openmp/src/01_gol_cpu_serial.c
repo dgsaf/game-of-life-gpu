@@ -179,7 +179,8 @@ int main(int argc, char **argv)
 
   cpu_write_timing(opt, elapsed_time);
 
-  game_of_life_stats(opt, current_step, grid);
+  // game_of_life_stats(opt, current_step, grid);
+  visualise(VISUAL_ASCII, current_step, grid, n, m);
 
   // free memory
   free(grid);

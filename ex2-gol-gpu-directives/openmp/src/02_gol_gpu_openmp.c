@@ -247,8 +247,10 @@ int main(int argc, char **argv)
 #pragma omp single
     kernel_start = init_time();
 
-    // perform game_of_life step (in-line for debugging)
-#pragma omp target teams distribute parallel for collapse(2) schedule(static,1)
+    // perform game_of_life step
+#pragma omp target
+#pragma omp teams
+#pragma omp distribute parallel for collapse(2) schedule(static)
     for (int i = 0; i < n; i++)
     {
       for (int j = 0; j < m; j++)
@@ -259,7 +261,6 @@ int main(int argc, char **argv)
                                                         neighbours);
       }
     }
-    // game_of_life(opt, grid, updated_grid, n, m);
 
     // wait for all cells to be updated
 #pragma omp barrier
@@ -296,7 +297,8 @@ int main(int argc, char **argv)
 
   gpu_write_timing(opt, elapsed_time, kernel_time);
 
-  game_of_life_stats(opt, current_step, grid);
+  // game_of_life_stats(opt, current_step, grid);
+  visualise(VISUAL_ASCII, current_step, grid, n, m);
 
   // free memory
   free(grid);

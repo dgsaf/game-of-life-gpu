@@ -185,7 +185,6 @@ int main(int argc, char **argv)
   struct Options *opt = (struct Options *) malloc(sizeof(struct Options));
   getinput(argc, argv, opt);
 
-  // debug: verbose
   verbose("read input");
 
   // define parameter variables
@@ -267,19 +266,13 @@ int main(int argc, char **argv)
 
   verbose("GOL simulation timing finished");
 
-  // debug: calculate time for entire program execution
-  float total_time = get_elapsed_time(start);
-  timing("<total_time> = %f [ms]", total_time);
-
-  verbose("program timing finished");
-
-  // debug: visualise `grid` after loop completion
-  visual(current_step, grid, n, m, "<grid, final> = ");
-
-  // write total time to file
+  // write timing to file
   cpu_write_timing(opt, elapsed_time);
 
   verbose("<elapsed_time> written to file");
+
+  // debug: visualise `grid` after loop completion
+  visual(current_step, grid, n, m, "<grid, final> = ");
 
   // write GOL statistics to file
   // game_of_life_stats(opt, current_step, grid);
@@ -290,6 +283,12 @@ int main(int argc, char **argv)
   free(opt);
 
   verbose("memory freed");
+
+  // debug: calculate time for entire program execution
+  float total_time = get_elapsed_time(start);
+  timing("<total_time> = %f [ms]", total_time);
+
+  verbose("program timing finished");
 
   return 0;
 }

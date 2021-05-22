@@ -383,19 +383,14 @@ int main(int argc, char **argv)
 
   verbose("GOL simulation timing finished");
 
-  // debug: calculate time for entire program execution
-  float total_time = get_elapsed_time(start);
-  timing("<total_time> = %f [ms]", total_time);
+  // write timing to file
+  gpu_write_timing(opt, elapsed_time, kernel_time);
 
-  verbose("program timing finished");
+  verbose("<elapsed_time>, <kernel_time> written to file");
 
   // debug: visualise `grid` after loop completion
   visual(current_step, grid, n, m, "<grid, final> = ");
 
-  // write total time to file
-  gpu_write_timing(opt, elapsed_time, kernel_time);
-
-  verbose("<elapsed_time>, <kernel_time> written to file");
 
   // write GOL statistics to file
   // game_of_life_stats(opt, current_step, grid);
@@ -406,6 +401,12 @@ int main(int argc, char **argv)
   free(opt);
 
   verbose("memory freed");
+
+  // debug: calculate time for entire program execution
+  float total_time = get_elapsed_time(start);
+  timing("<total_time> = %f [ms]", total_time);
+
+  verbose("program timing finished");
 
   return 0;
 }

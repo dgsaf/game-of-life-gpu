@@ -139,15 +139,15 @@ int main(int argc, char **argv)
   const int debug_verbose = 1;
   const int debug_timing = 1;
   const int debug_visual = 1;
-#define verbose(str) (if (debug_verbose) {printf("> %s\n", str);})
+  //#define verbose(str) if (debug_verbose) {printf("> %s\n", str);}
+#define verbose(format, ...) {\
+    if (debug_verbose) {printf("> "format"\n", ##__VA_ARGS__);}\
+  }
 
   // debug: verbose
-  if (debug_verbose)
-  {
-    printf("> <debug_verbose> = on\n");
-    if (debug_timing) printf("> <debug_timing> = on\n");
-    if (debug_visual) printf("> <debug_visual> = on\n");
-  }
+  verbose("<debug_verbose> = on");
+  if (debug_timing) verbose("debug_timing> = on");
+  if (debug_visual) verbose("debug_visual> = on");
 
   // define timing variables
   struct timeval start;
@@ -158,15 +158,14 @@ int main(int argc, char **argv)
   start = init_time();
 
   // debug: verbose
-  if (debug_verbose) printf("> program timing initialised\n");
-  verbose("program timing intialised")
+  verbose("program timing initialised");
 
-    // read input
-    struct Options *opt = (struct Options *) malloc(sizeof(struct Options));
+  // read input
+  struct Options *opt = (struct Options *) malloc(sizeof(struct Options));
   getinput(argc, argv, opt);
 
   // debug: verbose
-  if (debug_verbose) printf("> read input\n");
+  verbose("read input");
 
   // define parameter variables
   const int n = opt->n;
@@ -174,7 +173,7 @@ int main(int argc, char **argv)
   const int nsteps = opt->nsteps;
 
   // debug: verbose
-  if (debug_verbose) printf("> parameters defined\n");
+  verbose("parameters defined");
 
   // allocate memory for `grid`, `update_grid` variables
   int *grid = (int *) malloc(sizeof(int) * n * m);
@@ -187,7 +186,7 @@ int main(int argc, char **argv)
   }
 
   // debug: verbose
-  if (debug_verbose) printf("> <grid>, <updated_grid> memory allocated\n");
+  verbose("<grid>, <updated_grid> memory allocated");
 
   // initialise step counter
   int current_step = 0;
@@ -196,12 +195,12 @@ int main(int argc, char **argv)
   generate_IC(opt->iictype, grid, n, m);
 
   // debug: verbose
-  if (debug_verbose) printf("> <grid> initial conditions generated\n");
+  verbose("<grid> initial conditions generated");
 
   // debug: visualise `grid` after initial conditions
   if (debug_visual)
   {
-    printf("<grid, initial> = \n", current_step);
+    printf("> <grid, initial> = \n", current_step);
     visualise_ascii(current_step, grid, n, m);
   }
 
@@ -209,16 +208,25 @@ int main(int argc, char **argv)
   gol_start = init_time();
 
   // debug: verbose
-  if (debug_verbose) printf("> GOL simulation timing initialised \n");
+  verbose("GOL simulation timing initialised");
 
   // GOL simulation loop
   while (current_step != nsteps)
   {
+    // debug: verbose
+    verbose("<%i> GOL loop started", current_step);
+
     // initialise timing of current step in GOL simulation
     step_start = init_time();
 
+    // debug: verbose
+    verbose("<%i> timing initialised", current_step);
+
     // calculate next state of grid according to GOL update rules
     game_of_life(opt, grid, updated_grid, n, m);
+
+    // debug: verbose
+    verbose("<%i> next GOL state calculated", current_step);
 
     // swap current and updated grid
     {
@@ -226,6 +234,9 @@ int main(int argc, char **argv)
       grid = updated_grid;
       updated_grid = tmp;
     }
+
+    // debug: verbose
+    verbose("<%i> grids swapped", current_step);
 
     // debug: calculate time for this step in GOL simulation
     if (debug_timing)
@@ -243,11 +254,17 @@ int main(int argc, char **argv)
 
     // increment step counter
     current_step++;
+
+    // debug: verbose
+    verbose("<%i> GOL loop finished", current_step);
   }
 
   // calculate time for GOL simulation
   float elapsed_time = get_elapsed_time(gol_start);
   printf("<elapsed_time> = %f [ms]\n", elapsed_time);
+
+  // debug: verbose
+  verbose("GOL simulation timing finished");
 
   // debug: calculate time for entire program execution
   if (debug_timing)
@@ -255,6 +272,9 @@ int main(int argc, char **argv)
     float total_time = get_elapsed_time(start);
     printf("<total_time> = %f [ms]\n", total_time);
   }
+
+  // debug: verbose
+  verbose("program timing finished");
 
   // debug: visualise `grid` after loop completion
   if (debug_visual)
@@ -266,6 +286,9 @@ int main(int argc, char **argv)
   // write total time to file
   cpu_write_timing(opt, elapsed_time);
 
+  // debug: verbose
+  verbose("<elapsed_time> written to file");
+
   // write GOL statistics to file
   // game_of_life_stats(opt, current_step, grid);
 
@@ -273,6 +296,9 @@ int main(int argc, char **argv)
   free(grid);
   free(updated_grid);
   free(opt);
+
+  // debug: verbose
+  verbose("memory freed");
 
   return 0;
 }

@@ -139,6 +139,15 @@ int main(int argc, char **argv)
   const int debug_verbose = 1;
   const int debug_timing = 1;
   const int debug_visual = 1;
+#define verbose(str) (if (debug_verbose) {printf("> %s\n", str);})
+
+  // debug: verbose
+  if (debug_verbose)
+  {
+    printf("> <debug_verbose> = on\n");
+    if (debug_timing) printf("> <debug_timing> = on\n");
+    if (debug_visual) printf("> <debug_visual> = on\n");
+  }
 
   // define timing variables
   struct timeval start;
@@ -148,14 +157,24 @@ int main(int argc, char **argv)
   // initialise timing of entire program execution
   start = init_time();
 
-  // read input
-  struct Options *opt = (struct Options *) malloc(sizeof(struct Options));
+  // debug: verbose
+  if (debug_verbose) printf("> program timing initialised\n");
+  verbose("program timing intialised")
+
+    // read input
+    struct Options *opt = (struct Options *) malloc(sizeof(struct Options));
   getinput(argc, argv, opt);
+
+  // debug: verbose
+  if (debug_verbose) printf("> read input\n");
 
   // define parameter variables
   const int n = opt->n;
   const int m = opt->m;
   const int nsteps = opt->nsteps;
+
+  // debug: verbose
+  if (debug_verbose) printf("> parameters defined\n");
 
   // allocate memory for `grid`, `update_grid` variables
   int *grid = (int *) malloc(sizeof(int) * n * m);
@@ -167,11 +186,17 @@ int main(int argc, char **argv)
     return -1;
   }
 
+  // debug: verbose
+  if (debug_verbose) printf("> <grid>, <updated_grid> memory allocated\n");
+
   // initialise step counter
   int current_step = 0;
 
   // generate initial conditions
   generate_IC(opt->iictype, grid, n, m);
+
+  // debug: verbose
+  if (debug_verbose) printf("> <grid> initial conditions generated\n");
 
   // debug: visualise `grid` after initial conditions
   if (debug_visual)
@@ -182,6 +207,9 @@ int main(int argc, char **argv)
 
   // initialise timing of GOL simulation
   gol_start = init_time();
+
+  // debug: verbose
+  if (debug_verbose) printf("> GOL simulation timing initialised \n");
 
   // GOL simulation loop
   while (current_step != nsteps)

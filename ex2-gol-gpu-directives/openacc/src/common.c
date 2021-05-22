@@ -10,19 +10,87 @@ void visualise(enum VisualiseType ivisualisetype, int step, int *grid, int n, in
 }
 
 /// ascii visualisation
+// modified to truncate ascii output (for visualising at least part of a large
+// grid)
 void visualise_ascii(int step, int *grid, int n, int m){
-    printf("Game of Life\n");
-    printf("Step %d:\n", step);
-    for(int i = 0; i < n; i++)
+  // maximum number of grid cells to show for each dimension
+  const int visual_n_max = 20;
+  const int visual_m_max = 20;
+
+  int n_max;
+  int m_max;
+
+  int truncate_n;
+  int truncate_m;
+
+  if (n > visual_n_max)
+  {
+    n_max = visual_n_max;
+    truncate_n = 1;
+  }
+  else
+  {
+    n_max = n;
+    truncate_n = 0;
+  }
+
+  if (m > visual_m_max)
+  {
+    m_max = visual_m_max;
+    truncate_m = 1;
+  }
+  else
+  {
+    m_max = m;
+    truncate_m = 0;
+  }
+
+  // print cells up to maximum showable dimension
+  for (int i = 0; i < n_max; i++)
+  {
+    for (int j = 0; j < m_max; j++)
     {
-        for(int j = 0; j < m; j++)
-        {
-            char cell = ' ';
-            if (grid[i*m + j] == ALIVE) cell = '*';
-            printf(" %c ", cell);
-        }
-        printf("\n");
+      char cell = ' ';
+      if (grid[i*m + j] == ALIVE) cell = '*';
+      printf(" %c ", cell);
     }
+
+    // if more columns than can be shown, append each row with '...'
+    if (truncate_m)
+    {
+      prinft(" ... \n");
+    }
+    else
+    {
+      printf("\n");
+    }
+  }
+
+  // if more rows than can be shown, append each column with '...'
+  if (truncate_m)
+  {
+    for(int i = 0; i < 3; i++)
+    {
+      for(int j = 0; j < min(m, visual_m_max); j++)
+      {
+        printf(" . ");
+      }
+      printf("\n");
+    }
+  }
+
+  /* printf("Game of Life\n"); */
+  /* printf("Step %d:\n", step); */
+  /* for(int i = 0; i < n; i++) */
+  /* { */
+  /*   for(int j = 0; j < m; j++) */
+  /*   { */
+  /*     char cell = ' '; */
+  /*     if (grid[i*m + j] == ALIVE) cell = '*'; */
+  /*     printf(" %c ", cell); */
+  /*   } */
+  /*   printf("\n"); */
+  /* } */
 }
 
 void visualise_png(int step, int *grid, int n, int m){

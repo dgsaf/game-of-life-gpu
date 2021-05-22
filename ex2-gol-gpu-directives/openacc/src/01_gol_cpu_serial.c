@@ -140,15 +140,6 @@ int main(int argc, char **argv)
   const int debug_timing = 1;
   const int debug_visual = 1;
 
-  const int visual_n_max = 20;
-  const int visual_m_max = 20;
-
-#define min(x, y) (((x) < (y)) ? (x) : (y))
-#define debug_visualise(step, grid, n, m) {                 \
-    visualise(VISUAL_ASCII, step, grid,                     \
-              min(visual_n_max, n), min(visual_m_max, m));  \
-  }
-
   // define timing variables
   struct timeval start;
   struct timeval gol_start;
@@ -186,7 +177,7 @@ int main(int argc, char **argv)
   if (debug_visual)
   {
     printf("<grid, initial> = \n", current_step);
-    debug_visualise(current_step, grid, n, m);
+    visualise(VISUAL_ASCII, current_step, grid, n, m);
   }
 
   // initialise timing of GOL simulation
@@ -219,7 +210,7 @@ int main(int argc, char **argv)
     if (debug_visual)
     {
       printf("<grid, %i> = \n", current_step);
-      debug_visualise(current_step, grid, n, m);
+      visualise(VISUAL_ASCII, current_step, grid, n, m);
     }
 
     // increment step counter
@@ -241,7 +232,7 @@ int main(int argc, char **argv)
   if (debug_visual)
   {
     printf("<grid, final> = \n", current_step);
-    debug_visualise(current_step, grid, n, m);
+    visualise(VISUAL_ASCII, current_step, grid, n, m);
   }
 
   // write total time to file

@@ -1,6 +1,7 @@
 #!/bin/bash --login
 
 # load modules
+module purge
 module load pgi
 module load cuda
 module load cascadelake

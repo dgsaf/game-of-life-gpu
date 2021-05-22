@@ -9,7 +9,7 @@
 //   grid variables as they are intialised and updated
 const int debug_verbose = 1;
 const int debug_timing = 1;
-const int debug_visual = 0;
+const int debug_visual = 1;
 
 // verbose macro
 #define verbose(format, ...)                                \
@@ -92,36 +92,72 @@ void cpu_game_of_life_step(int *current_grid, int *next_grid, int n, int m)
 */
 int* cpu_game_of_life(const int *initial_state, int n, int m, int nsteps)
 {
+  // allocate memory for `grid`, `update_grid` variables
   int *grid = (int *) malloc(sizeof(int) * n * m);
   int *updated_grid = (int *) malloc(sizeof(int) * n * m);
 
-  if (!grid || !updated_grid)
+  if (grid == NULL || updated_grid == NULL)
   {
-    printf("Error while allocating memory.\n");
+    fprintf(stderr, "error while allocating memory for grids\n");
     exit(1);
   }
 
-  int current_step = 0;
-  int *tmp = NULL;
+  verbose("<grid>, <updated_grid> memory allocated: sizeof(int) * %i", n * m);
 
+  // initialise step counter
+  int current_step = 0;
+
+  // copy `initial_state` to `grid`
   memcpy(grid, initial_state, sizeof(int) * n * m);
 
-  while(current_step != nsteps)
+  verbose("copied <initial_state> to <grid>");
+
+  // define timing variable
+  struct timeval step_start;
+
+  while (current_step != nsteps)
   {
     current_step++;
+
+    verbose("<%i> GOL step started", current_step);
+
+    // initialise timing of current step in GOL simulation
+    step_start = init_time();
+
+    verbose("<%i> timing initialised", current_step);
 
     // Uncomment the following line if you want to print the state at every step
     // visualise(opt->ivisualisetype, current_step, grid, n, m);
 
+    // calculate next state of grid according to GOL update rules
     cpu_game_of_life_step(grid, updated_grid, n, m);
 
+    verbose("<%i> next GOL state calculated", current_step);
+
     // swap current and updated grid
-    tmp = grid;
-    grid = updated_grid;
-    updated_grid = tmp;
+    {
+      int *tmp = grid;
+      grid = updated_grid;
+      updated_grid = tmp;
+    }
+
+    verbose("<%i> grids swapped", current_step);
+
+    // debug: calculate time for this step in GOL simulation
+    float step_time = get_elapsed_time(step_start);
+    timing("<step_time, %i> = %f [ms]", current_step, step_time);
+
+    // debug: visualise `grid` after current step
+    visual(current_step, grid, n, m, "<grid, %i> = ", current_step);
+
+    verbose("<%i> GOL step finished", current_step);
   }
 
+  verbose("GOL loop finished");
+
   free(updated_grid);
+
+  verbose("<updated_grid> memory freed");
 
   return grid;
 }
@@ -173,7 +209,6 @@ int main(int argc, char **argv)
   // define timing variables
   struct timeval start;
   struct timeval gol_start;
-  struct timeval step_start;
 
   // initialise timing of entire program execution
   start = init_time();
@@ -194,7 +229,7 @@ int main(int argc, char **argv)
   verbose("parameters defined: <n> = %i, <m> = %i, <nsteps> = %i", \
           n, m, nsteps);
 
-  // allocate memory for `grid` variables
+  // allocate memory for `initial_state` variable
   int *initial_state = (int *) malloc(sizeof(int) * n * m);
 
   if (initial_state == NULL)

@@ -97,16 +97,26 @@ struct timeval init_time(){
     gettimeofday(&curtime, NULL);
     return curtime;
 }
+
 /// get the elapsed time relative to start, return current wall time
-struct timeval get_elapsed_time(struct timeval start){
-    struct timeval curtime, delta;
-    gettimeofday(&curtime, NULL);
-    delta.tv_sec = curtime.tv_sec - start.tv_sec;
-    delta.tv_usec = curtime.tv_usec - start.tv_usec;
-    double deltas = delta.tv_sec+delta.tv_usec/1e6;
-    printf("Elapsed time %f s\n", deltas);
-    return curtime;
+// using get_elapsed_time from ex1-gol-cuda/src/common.c to standardise time
+// presentation
+float get_elapsed_time(struct timeval start){
+  struct timeval curtime, delta;
+  gettimeofday(&curtime, NULL);
+  timersub(&curtime, &start, &delta);
+  float elapsed = delta.tv_sec * 1000.0f + delta.tv_usec / 1000.0f;
+  return elapsed;
 }
+/* struct timeval get_elapsed_time(struct timeval start){ */
+/*     struct timeval curtime, delta; */
+/*     gettimeofday(&curtime, NULL); */
+/*     delta.tv_sec = curtime.tv_sec - start.tv_sec; */
+/*     delta.tv_usec = curtime.tv_usec - start.tv_usec; */
+/*     double deltas = delta.tv_sec+delta.tv_usec/1e6; */
+/*     printf("Elapsed time %f s\n", deltas); */
+/*     return curtime; */
+/* } */
 
 /// UI
 void getinput(int argc, char **argv, struct Options *opt){

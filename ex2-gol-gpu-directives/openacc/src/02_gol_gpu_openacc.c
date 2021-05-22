@@ -369,7 +369,7 @@ int main(int argc, char **argv)
 #pragma acc exit data copyout(grid[0:n*m]) delete(updated_grid[0:n*m])
 
   // debug: calculate time for OpenACC data transfer out
-  transfer_time = get_elasped_time(transfer_start);
+  transfer_time = get_elapsed_time(transfer_start);
   timing("<transfer_time> = %f [ms]", transfer_time);
 
   verbose("OpenACC: <grid> copied from gpu, <updated_grid> deleted on gpu");
@@ -395,7 +395,7 @@ int main(int argc, char **argv)
   // write total time to file
   gpu_write_timing(opt, elapsed_time, kernel_time);
 
-  verbose("<elapsed_time> written to file");
+  verbose("<elapsed_time>, <kernel_time> written to file");
 
   // write GOL statistics to file
   // game_of_life_stats(opt, current_step, grid);

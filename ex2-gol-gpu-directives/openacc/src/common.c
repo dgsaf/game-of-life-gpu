@@ -55,10 +55,10 @@ void visualise_ascii(int step, int *grid, int n, int m){
       printf(" %c ", cell);
     }
 
-    // if more columns than can be shown, append each row with '...'
+    // if more columns than can be shown, append each row with '.'
     if (truncate_m)
     {
-      prinft(" ... \n");
+      printf(" . \n");
     }
     else
     {
@@ -66,17 +66,14 @@ void visualise_ascii(int step, int *grid, int n, int m){
     }
   }
 
-  // if more rows than can be shown, append each column with '...'
+  // if more rows than can be shown, append each column with '.'
   if (truncate_m)
   {
-    for(int i = 0; i < 3; i++)
+    for(int j = 0; j < m_max; j++)
     {
-      for(int j = 0; j < min(m, visual_m_max); j++)
-      {
-        printf(" . ");
-      }
-      printf("\n");
+      printf(" . ");
     }
+    printf("\n");
   }
 
   /* printf("Game of Life\n"); */

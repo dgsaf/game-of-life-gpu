@@ -136,9 +136,16 @@ int cpu_write_timing(struct Options const * opt, float const elapsed_time)
 int main(int argc, char **argv)
 {
   // debug parameters
-  int debug_verbose = 1;
-  int debug_timing = 1;
-  int debug_visual = 1;
+  const int debug_verbose = 1;
+  const int debug_timing = 1;
+  const int debug_visual = 1;
+
+  const int visual_n_max = 20;
+  const int visual_m_max = 20;
+#define debug_visualise(step, grid, n, m) {               \
+    visualise(VISUAL_ASCII, step, grid,                   \
+              min(visual_n_max, n), min(visual_m_max, m)) \
+      }
 
   // define timing variables
   struct timeval start;
@@ -173,6 +180,13 @@ int main(int argc, char **argv)
   // generate initial conditions
   generate_IC(opt->iictype, grid, n, m);
 
+  // debug: visualise `grid` after initial conditions
+  if (debug_visual)
+  {
+    printf("<grid, initial> = \n", current_step);
+    debug_visualise(current_step, grid, n, m);
+  }
+
   // initialise timing of GOL simulation
   gol_start = init_time();
 
@@ -192,11 +206,18 @@ int main(int argc, char **argv)
       updated_grid = tmp;
     }
 
-    // calculate time for this step in GOL simulation (if debugging timing)
+    // debug: calculate time for this step in GOL simulation
     if (debug_timing)
     {
       float step_time = get_elapsed_time(step_start);
-      printf("<step_time, %i> = %f [ms]", current_step, step_time);
+      printf("<step_time, %i> = %f [ms]\n", current_step, step_time);
+    }
+
+    // debug: visualise `grid` after current step
+    if (debug_visual)
+    {
+      printf("<grid, %i> = \n", current_step);
+      debug_visualise(current_step, grid, n, m);
     }
 
     // increment step counter
@@ -205,13 +226,20 @@ int main(int argc, char **argv)
 
   // calculate time for GOL simulation
   float elapsed_time = get_elapsed_time(gol_start);
-  printf("<elapsed_time> = %f [ms]", elapsed_time);
+  printf("<elapsed_time> = %f [ms]\n", elapsed_time);
 
-  // calculate time for entire program execution (if debugging timing)
+  // debug: calculate time for entire program execution
   if (debug_timing)
   {
     float total_time = get_elapsed_time(start);
-    printf("<total_time> = %f [ms]", total_time);
+    printf("<total_time> = %f [ms]\n", total_time);
+  }
+
+  // debug: visualise `grid` after loop completion
+  if (debug_visual)
+  {
+    printf("<grid, final> = \n", current_step);
+    debug_visualise(current_step, grid, n, m);
   }
 
   // write total time to file

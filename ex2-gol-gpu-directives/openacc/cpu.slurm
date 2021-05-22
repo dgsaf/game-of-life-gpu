@@ -7,7 +7,6 @@
 #SBATCH --partition=gpuq
 #SBATCH --time=00:15:00
 #SBATCH --export=NONE
-#SBATCH --mem=1G
 
 # load modules
 module load pgi

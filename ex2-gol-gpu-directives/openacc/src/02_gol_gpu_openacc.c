@@ -272,8 +272,9 @@ int main(int argc, char **argv)
   // debug: verbose
   verbose("<grid>, <updated_grid> memory allocated: sizeof(int) * %i", n * m);
 
-  // initialise step counter
+  // initialise step counter, kernel_time
   int current_step = 0;
+  float kernel_time = 0.0;
 
   // generate initial conditions
   generate_IC(opt->iictype, grid, n, m);
@@ -331,6 +332,9 @@ int main(int argc, char **argv)
       }
     }
 
+    // calculate time spent in kernel
+    kernel_time += get_elapsed_time(step_start);
+
     // debug: verbose
     verbose("OpenACC: <%i> next GOL state calculated", current_step);
 
@@ -385,6 +389,9 @@ int main(int argc, char **argv)
   float elapsed_time = get_elapsed_time(gol_start);
   timing("<elapsed_time> = %f [ms]", elapsed_time);
 
+  // debug: total kernel time
+  timing("<kernel_time> = %f [ms]", kernel_time);
+
   // debug: verbose
   verbose("GOL simulation timing finished");
 
@@ -399,7 +406,7 @@ int main(int argc, char **argv)
   visual(current_step, grid, n, m, "<grid, final> = ");
 
   // write total time to file
-  gpu_write_timing(opt, elapsed_time);
+  gpu_write_timing(opt, elapsed_time, kernel_time);
 
   // debug: verbose
   verbose("<elapsed_time> written to file");

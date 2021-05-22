@@ -1,5 +1,4 @@
 #include "common.h"
-#include <omp.h>
 
 //
 #pragma omp declare target
@@ -209,6 +208,11 @@ int gpu_write_timing(struct Options const * opt, float const elapsed_time, \
 
 int main(int argc, char **argv)
 {
+  // debugging flags
+  const int debug_verbose = 1;
+  const int debug_visual = 1;
+  const int debug_timing = 1;
+
   // read input parameters
   struct Options *opt = (struct Options *) malloc(sizeof(struct Options));
   getinput(argc, argv, opt);
@@ -224,42 +228,42 @@ int main(int argc, char **argv)
     return -1;
   }
 
+  generate_IC(opt->iictype, grid, n, m);
+
   int current_step = 0;
 
-  generate_IC(opt->iictype, grid, n, m);
+  // debug
+  if (debug_visual)
+  {
+    printf("<grid>(CPU): intial\n");
+    visualise(VISUAL_ASCII, current_step, grid, n, m);
+  }
 
   // initialise timing
   struct timeval start, kernel_start;
   start = init_time();
   float kernel_time = 0.0;
 
-  //debugging
-  printf("grid (CPU): initial\n");
-  visualise(VISUAL_ASCII, current_step, grid, n, m);
-
-  // omp - move grid variables from cpu memory to gpu memory for the duration of
-  // the loop
-  // - `target` defines a task to perform on the gpu
-  // - `enter data` defines a transfer of cpu memory to gpu memory
-  // - `map(to:*)` moves `grid` and `updated_grid` from the cpu memory into the
-  //   gpu memory
-#pragma omp target enter data map(to:grid[0:n*m],updated_grid[0:n*m])
+  // move grid to gpu, allocate updated_grid on gpu
+#pragma omp target enter data map(to:grid[0:n*m], alloc:updated_grid[0:n*m])
 
   // calculate final game_of_life state
   while (current_step != nsteps)
   {
-    //debugging
+    // debug
+    if (debug_visual)
+    {
 #pragma omp target update from(grid[0:n*m])
 #pragma omp single
-    {
-      printf("grid (GPU): %i\n", current_step);
+      printf("<grid>(GPU): %i\n", current_step);
       visualise(VISUAL_ASCII, current_step, grid, n, m);
     }
+#pragma omp barrier
 
 #pragma omp single
-      kernel_start = init_time();
+    kernel_start = init_time();
 
-      // perform game_of_life step
+    // perform game_of_life step
 #pragma omp target
 #pragma omp teams
 #pragma omp distribute parallel for collapse(2) schedule(static)
@@ -311,9 +315,12 @@ int main(int argc, char **argv)
 
   // game_of_life_stats(opt, current_step, grid);
 
-  //debugging
-  printf("grid (CPU): final\n", current_step);
-  visualise(VISUAL_ASCII, current_step, grid, n, m);
+  // debug
+  if (debug_visual)
+  {
+    printf("grid (CPU): final\n", current_step);
+    visualise(VISUAL_ASCII, current_step, grid, n, m);
+  }
 
   // free memory
   free(grid);

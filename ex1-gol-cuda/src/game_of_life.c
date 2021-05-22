@@ -126,9 +126,6 @@ int* cpu_game_of_life(const int *initial_state, int n, int m, int nsteps)
 
     verbose("<%i> timing initialised", current_step);
 
-    // Uncomment the following line if you want to print the state at every step
-    // visualise(opt->ivisualisetype, current_step, grid, n, m);
-
     // calculate next state of grid according to GOL update rules
     cpu_game_of_life_step(grid, updated_grid, n, m);
 

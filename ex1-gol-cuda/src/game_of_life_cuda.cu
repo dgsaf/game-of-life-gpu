@@ -119,6 +119,8 @@ int* gpu_game_of_life(const int *initial_state, int n, int m, int nsteps, \
   const int n_threads = 1024;
   const int n_blocks = ((n * m - 1) / n_threads) + 1;
 
+  verbose ("CUDA: <n_blocks> = %i, <n_threads> = %i", n_blocks, n_threads);
+
   // allocate gpu memory
   int *grid;
   int *updated_grid;
@@ -126,9 +128,13 @@ int* gpu_game_of_life(const int *initial_state, int n, int m, int nsteps, \
   cuda_error_check(cudaMalloc(&grid, sizeof(int) * n * m));
   cuda_error_check(cudaMalloc(&updated_grid, sizeof(int) * n * m));
 
+  verbose ("CUDA: <grid>, <updated_grid> memory allocated (GPU)");
+
   // copy initial state to gpu memory
   cuda_error_check(cudaMemcpy(grid, initial_state, sizeof(int) * n * m, \
                               cudaMemcpyHostToDevice));
+
+  verbose ("CUDA: copied <intial_state> (CPU) to <grid> (GPU)");
 
   // prepare kernel timing variables
   *kernel_time = 0.0;
@@ -138,48 +144,77 @@ int* gpu_game_of_life(const int *initial_state, int n, int m, int nsteps, \
   cuda_error_check(cudaEventCreate(&kernel_stop));
   float kernel_time_step = 0.0;
 
+  verbose ("CUDA: <kernel_start>, <kernel_stop> CUDA events defined");
+
   // initialise game_of_life loop
   int current_step = 0;
-  int *tmp = NULL;
 
   while (current_step != nsteps)
   {
     current_step++;
 
-    // Uncomment the following line if you want to print the state at every step
-    // visualise(opt->ivisualisetype, current_step, grid, n, m);
+    verbose("CUDA: <%i> GOL step started", current_step);
 
-    // execute game_of_life_step cuda kernel
+    // initialise timing of kernel execution
     cuda_error_check(cudaEventRecord(kernel_start));
+
+    verbose("CUDA: <%i> timing intialised", current_step);
+
+    // calculate next state of GOL using CUDA kernel across grid
     gpu_game_of_life_step<<<n_blocks, n_threads>>>(grid, updated_grid, n, m);
+
+    verbose("CUDA: <%i> next GOL state calculated", current_step);
+
+    // finalise timing of kernel execution
     cuda_error_check(cudaEventRecord(kernel_stop));
-    cuda_error_check(cudaDeviceSynchronize());
+    cuda_error_check(cudaDeviceSynchronize(kernel_stop));
+
+    // swap current and updated grid
+    {
+      int *tmp = grid;
+      grid = updated_grid;
+      updated_grid = tmp;
+    }
+
+    verbose("CUDA: <%i> grids swapped", current_step);
+
+    // calculate timing of kernel execution
     cuda_error_check(cudaEventElapsedTime(&kernel_time_step, kernel_start, \
                                           kernel_stop));
     *kernel_time += kernel_time_step;
 
-    // swap current and updated grid
-    tmp = grid;
-    grid = updated_grid;
-    updated_grid = tmp;
+    timing("CUDA: <step_time, %i> = %f [ms]", current_step, kernel_time_step);
+
+    // debug: visualise `grid` after current step
+    if (debug_visual)
+    {
+      visual(current_step, grid, n, m, "<grid, %i> = ", current_step);
+    }
+
+    verbose("CUDA: <%i> GOL step finished", current_step);
   }
+
+  verbose("CUDA: GOL loop finished");
 
   // copy final state to cpu memory
   int *final_state = (int *) malloc(sizeof(int) * n * m);
 
-  if (!final_state)
+  if (final_state == NULL)
   {
-    printf("gpu_game_of_life: error while allocating memory.\n");
+    fprintf(stderr, "error while allocating memory for <final_state>\n");
     exit(1);
   }
 
   cuda_error_check(cudaMemcpy(final_state, grid, sizeof(int) * n * m, \
                               cudaMemcpyDeviceToHost));
 
+  verbose ("CUDA: copied <grid> (GPU) to <final_state> (CPU)");
+
   // free gpu memory
   cudaFree(updated_grid);
   cudaFree(grid);
-  cudaFree(tmp);
+
+  verbose("CUDA: <grid>, <updated_grid> memory freed (GPU)");
 
   return final_state;
 }
@@ -254,7 +289,6 @@ int main(int argc, char **argv)
 
   // allocate memory for `initial_state` variable
   int *initial_state = (int *) malloc(sizeof(int) * n * m);
-  //int *final_state = (int *) malloc(sizeof(int) * n * m);
 
   if (initial_state == NULL)
   {
@@ -279,8 +313,8 @@ int main(int argc, char **argv)
 
   // calculate `final_state` (and record kernel time)
   float kernel_time = 0.0;
-  final_state = gpu_game_of_life(initial_state, n, m, nsteps, &kernel_time);
-
+  int *final_state = gpu_game_of_life(initial_state, n, m, nsteps,
+                                      &kernel_time);
 
   // calculate time for GOL simulation
   float elapsed_time = get_elapsed_time(gol_start);

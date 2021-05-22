@@ -1,7 +1,8 @@
 .PHONY : dirs
 
 CC=gcc
-COMMONFLAGS=#-DUSEPNG
+#COMMONFLAGS=#-DUSEPNG
+COMMONFLAGS=-std=c++03
 INCLUDES=#-I/usr/include
 LIBS=#-L/usr/lib64/ -lpng
 

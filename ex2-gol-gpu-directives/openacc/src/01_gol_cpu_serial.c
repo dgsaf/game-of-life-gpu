@@ -193,7 +193,6 @@ int main(int argc, char **argv)
   const int m = opt->m;
   const int nsteps = opt->nsteps;
 
-  // debug: verbose
   verbose("parameters defined: <n> = %i, <m> = %i, <nsteps> = %i", \
           n, m, nsteps);
 
@@ -207,7 +206,6 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  // debug: verbose
   verbose("<grid>, <updated_grid> memory allocated: sizeof(int) * %i", n * m);
 
   // initialise step counter
@@ -216,7 +214,6 @@ int main(int argc, char **argv)
   // generate initial conditions
   generate_IC(opt->iictype, grid, n, m);
 
-  // debug: verbose
   verbose("<grid> initial conditions generated");
 
   // debug: visualise `grid` after initial conditions
@@ -225,28 +222,21 @@ int main(int argc, char **argv)
   // initialise timing of GOL simulation
   gol_start = init_time();
 
-  // debug: verbose
   verbose("GOL simulation timing initialised");
 
   // GOL simulation loop
   while (current_step != nsteps)
   {
-    // debug: verbose
     verbose("<%i> GOL loop started", current_step);
 
     // initialise timing of current step in GOL simulation
     step_start = init_time();
 
-    // debug: verbose
     verbose("<%i> timing initialised", current_step);
-
-    // debug: verbose
-    verbose("<%i> calculating next GOL state", current_step);
 
     // calculate next state of grid according to GOL update rules
     game_of_life(opt, grid, updated_grid, n, m);
 
-    // debug: verbose
     verbose("<%i> next GOL state calculated", current_step);
 
     // swap current and updated grid
@@ -256,7 +246,6 @@ int main(int argc, char **argv)
       updated_grid = tmp;
     }
 
-    // debug: verbose
     verbose("<%i> grids swapped", current_step);
 
     // debug: calculate time for this step in GOL simulation
@@ -266,7 +255,6 @@ int main(int argc, char **argv)
     // debug: visualise `grid` after current step
     visual(current_step, grid, n, m, "<grid, %i> = ", current_step);
 
-    // debug: verbose
     verbose("<%i> GOL loop finished", current_step);
 
     // increment step counter
@@ -277,14 +265,12 @@ int main(int argc, char **argv)
   float elapsed_time = get_elapsed_time(gol_start);
   timing("<elapsed_time> = %f [ms]", elapsed_time);
 
-  // debug: verbose
   verbose("GOL simulation timing finished");
 
   // debug: calculate time for entire program execution
   float total_time = get_elapsed_time(start);
   timing("<total_time> = %f [ms]", total_time);
 
-  // debug: verbose
   verbose("program timing finished");
 
   // debug: visualise `grid` after loop completion
@@ -293,7 +279,6 @@ int main(int argc, char **argv)
   // write total time to file
   cpu_write_timing(opt, elapsed_time);
 
-  // debug: verbose
   verbose("<elapsed_time> written to file");
 
   // write GOL statistics to file
@@ -304,7 +289,6 @@ int main(int argc, char **argv)
   free(updated_grid);
   free(opt);
 
-  // debug: verbose
   verbose("memory freed");
 
   return 0;

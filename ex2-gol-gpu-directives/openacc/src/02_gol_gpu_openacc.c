@@ -240,14 +240,12 @@ int main(int argc, char **argv)
   // initialise timing of entire program execution
   start = init_time();
 
-  // debug: verbose
   verbose("program timing initialised");
 
   // read input
   struct Options *opt = (struct Options *) malloc(sizeof(struct Options));
   getinput(argc, argv, opt);
 
-  // debug: verbose
   verbose("read input");
 
   // define parameter variables
@@ -255,7 +253,6 @@ int main(int argc, char **argv)
   const int m = opt->m;
   const int nsteps = opt->nsteps;
 
-  // debug: verbose
   verbose("parameters defined: <n> = %i, <m> = %i, <nsteps> = %i", \
           n, m, nsteps);
 
@@ -269,7 +266,6 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  // debug: verbose
   verbose("<grid>, <updated_grid> memory allocated: sizeof(int) * %i", n * m);
 
   // initialise step counter, kernel_time
@@ -279,7 +275,6 @@ int main(int argc, char **argv)
   // generate initial conditions
   generate_IC(opt->iictype, grid, n, m);
 
-  // debug: verbose
   verbose("<grid> initial conditions generated");
 
   // debug: visualise `grid` after initial conditions
@@ -288,14 +283,12 @@ int main(int argc, char **argv)
   // initialise timing of GOL simulation
   gol_start = init_time();
 
-  // debug: verbose
   verbose("GOL simulation timing initialised");
 
   // initialise timing of OpenACC data transfer in
   transfer_start = init_time();
 
-  // debug: verbose
-  verbose("OpenACC: data transfer in timing initialised");
+  verbose("OpenACC: data transfer (in) timing initialised");
 
   // move `grid` to gpu, allocate `updated_grid` on gpu
 #pragma acc enter data copyin(grid[0:n*m]) create(updated_grid[0:n*m])
@@ -303,23 +296,17 @@ int main(int argc, char **argv)
   // debug: calculate time for OpenACC data transfer in
   timing("<transfer_time> = %f [ms]", get_elapsed_time(transfer_start));
 
-  // debug: verbose
   verbose("OpenACC: <grid> copied to gpu, <updated_grid> allocated on gpu");
 
   // GOL simulation loop
   while (current_step != nsteps)
   {
-    // debug: verbose
     verbose("<%i> GOL loop started", current_step);
 
     // initialise timing of current step in GOL simulation
     step_start = init_time();
 
-    // debug: verbose
     verbose("<%i> timing initialised", current_step);
-
-    // debug: verbose
-    verbose("OpenACC: <%i> calculating next GOL state", current_step);
 
     // calculate next state of grid according to GOL update rules
 #pragma acc kernels present(grid, updated_grid)
@@ -335,7 +322,6 @@ int main(int argc, char **argv)
     // calculate time spent in kernel
     kernel_time += get_elapsed_time(step_start);
 
-    // debug: verbose
     verbose("OpenACC: <%i> next GOL state calculated", current_step);
 
     // swap current and updated grid
@@ -345,7 +331,6 @@ int main(int argc, char **argv)
       updated_grid = tmp;
     }
 
-    // debug: verbose
     verbose("<%i> grids swapped", current_step);
 
     // debug: calculate time for this step in GOL simulation
@@ -356,14 +341,17 @@ int main(int argc, char **argv)
     if (debug_visual)
     {
       transfer_start = init_time();
-      verbose("OpenACC: <grid> update timing initialised");
+
+      verbose("OpenACC: <%i> <grid> update timing initialised", current_step);
+
 #pragma acc update self(grid[0:n*m])
+
       timing("<transfer_time> = %f [ms]", get_elapsed_time(transfer_start));
-      verbose("OpenACC: <%i> updated <grid> on host");
+
+      verbose("OpenACC: <%i> updated <grid> on host", current_step);
     }
     visual(current_step, grid, n, m, "<grid, %i> = ", current_step);
 
-    // debug: verbose
     verbose("<%i> GOL loop finished", current_step);
 
     // increment step counter
@@ -373,8 +361,7 @@ int main(int argc, char **argv)
   // initialise timing of OpenACC data transfer out
   transfer_start = init_time();
 
-  // debug: verbose
-  verbose("OpenACC: data transfer out timing initialised");
+  verbose("OpenACC: data transfer (out) timing initialised");
 
   // move `grid` to cpu, delete `updated_grid` on gpu
 #pragma acc exit data copyout(grid[0:n*m]) delete(updated_grid[0:n*m])
@@ -382,7 +369,6 @@ int main(int argc, char **argv)
   // debug: calculate time for OpenACC data transfer out
   timing("<transfer_time> = %f [ms]", get_elapsed_time(transfer_start));
 
-  // debug: verbose
   verbose("OpenACC: <grid> copied from gpu, <updated_grid> deleted on gpu");
 
   // calculate time for GOL simulation
@@ -392,14 +378,12 @@ int main(int argc, char **argv)
   // debug: total kernel time
   timing("<kernel_time> = %f [ms]", kernel_time);
 
-  // debug: verbose
   verbose("GOL simulation timing finished");
 
   // debug: calculate time for entire program execution
   float total_time = get_elapsed_time(start);
   timing("<total_time> = %f [ms]", total_time);
 
-  // debug: verbose
   verbose("program timing finished");
 
   // debug: visualise `grid` after loop completion
@@ -408,7 +392,6 @@ int main(int argc, char **argv)
   // write total time to file
   gpu_write_timing(opt, elapsed_time, kernel_time);
 
-  // debug: verbose
   verbose("<elapsed_time> written to file");
 
   // write GOL statistics to file
@@ -419,7 +402,6 @@ int main(int argc, char **argv)
   free(updated_grid);
   free(opt);
 
-  // debug: verbose
   verbose("memory freed");
 
   return 0;

@@ -240,6 +240,9 @@ int main(int argc, char **argv)
     // debug: verbose
     verbose("<%i> timing initialised", current_step);
 
+    // debug: verbose
+    verbose("<%i> calculating next GOL state", current_step);
+
     // calculate next state of grid according to GOL update rules
     game_of_life(opt, grid, updated_grid, n, m);
 

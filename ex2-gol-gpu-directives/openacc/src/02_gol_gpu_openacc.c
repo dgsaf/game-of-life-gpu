@@ -205,7 +205,7 @@ int main(int argc, char **argv)
   //   grid variables as they are intialised and updated
   const int debug_verbose = 1;
   const int debug_timing = 1;
-  const int debug_visual = 1;
+  const int debug_visual = 0;
 
   // verbose macro
 #define verbose(format, ...)                                \
@@ -310,7 +310,7 @@ int main(int argc, char **argv)
     verbose("<%i> timing initialised", current_step);
 
     // calculate next state of grid according to GOL update rules
-#pragma acc kernels present(grid, updated_grid)
+#pragma acc parallel loop present(grid, updated_grid)
     for (int i = 0; i < n; i++)
     {
       for (int j = 0; j < m; j++)

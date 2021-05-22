@@ -7,11 +7,10 @@
 #SBATCH --partition=gpuq
 #SBATCH --time=00:10:00
 #SBATCH --export=NONE
-#SBATCH --mem=1G
 
 # load modules
 module load gcc/8.3.0
-module load cuda
+module load cuda/10.2
 module load cascadelake
 
 # make binary
@@ -22,5 +21,5 @@ if [ -z "${n}" ] || [ -z "${m}" ] || [ -z "${nsteps}" ]
 then
     echo "cpu.slurm: missing arguments"
 else
-    srun bin/game_of_life ${n} ${m} ${nsteps}
+    srun --export=all -u -n 1 bin/game_of_life ${n} ${m} ${nsteps}
 fi

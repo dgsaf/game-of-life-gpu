@@ -142,10 +142,12 @@ int main(int argc, char **argv)
 
   const int visual_n_max = 20;
   const int visual_m_max = 20;
-#define debug_visualise(step, grid, n, m) {               \
-    visualise(VISUAL_ASCII, step, grid,                   \
-              min(visual_n_max, n), min(visual_m_max, m)) \
-      }
+
+#define min(x, y) (((x) < (y)) ? (x) : (y))
+#define debug_visualise(step, grid, n, m) {                 \
+    visualise(VISUAL_ASCII, step, grid,                     \
+              min(visual_n_max, n), min(visual_m_max, m));  \
+  }
 
   // define timing variables
   struct timeval start;

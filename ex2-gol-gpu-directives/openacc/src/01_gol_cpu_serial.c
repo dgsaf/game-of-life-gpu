@@ -140,16 +140,15 @@ int main(int argc, char **argv)
   const int debug_timing = 1;
   const int debug_visual = 1;
 
-  const char *indent = "--";
-#define verbose(format, ...) {                                        \
-    if (debug_verbose) {printf(indent"> "format"\n", ##__VA_ARGS__);} \
+#define prefix "> "
+#define verbose(format, ...) {                                      \
+    if (debug_verbose) {printf(prefix format"\n", ##__VA_ARGS__);}  \
   }
 
   // debug: verbose
-  verbose("debug flags");
-  if (debug_timing) verbose(indent"<debug_verbose> = on");
-  if (debug_timing) verbose(indent"<debug_timing> = on");
-  if (debug_visual) verbose(indent"<debug_visual> = on");
+  verbose("<debug_verbose> = on");
+  if (debug_timing) verbose("<debug_timing> = on");
+  if (debug_visual) verbose("<debug_visual> = on");
 
   // define timing variables
   struct timeval start;
@@ -175,10 +174,8 @@ int main(int argc, char **argv)
   const int nsteps = opt->nsteps;
 
   // debug: verbose
-  verbose("parameters defined");
-  verbose(indent"<n> = %i", n);
-  verbose(indent"<m> = %i", m);
-  verbose(indent"<nsteps> = %i", nsteps);
+  verbose("parameters defined: <n> = %i, <m> = %i, <nsteps> = %i", \
+          n, m, nsteps);
 
   // allocate memory for `grid`, `update_grid` variables
   int *grid = (int *) malloc(sizeof(int) * n * m);
@@ -191,7 +188,7 @@ int main(int argc, char **argv)
   }
 
   // debug: verbose
-  verbose("<grid>, <updated_grid> memory allocated");
+  verbose("<grid>, <updated_grid> memory allocated: sizeof(int) * %i", n * m);
 
   // initialise step counter
   int current_step = 0;
@@ -205,7 +202,7 @@ int main(int argc, char **argv)
   // debug: visualise `grid` after initial conditions
   if (debug_visual)
   {
-    printf("> <grid, initial> = \n", current_step);
+    printf("<grid, initial> = \n", current_step);
     visualise_ascii(current_step, grid, n, m);
   }
 

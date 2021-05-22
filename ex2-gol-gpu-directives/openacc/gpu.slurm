@@ -14,7 +14,7 @@ module load cuda
 module load cascadelake
 
 # run with `PROFILER`=(ON|OFF) flag
-PROFILER="ON"
+PROFILER="OFF"
 
 # make binary
 srun --export=all -u -n 1 make bin/02_gol_gpu_openacc PROFILER=${PROFILER}

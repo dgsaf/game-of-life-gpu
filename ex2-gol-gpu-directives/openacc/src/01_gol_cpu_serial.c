@@ -203,7 +203,7 @@ int main(int argc, char **argv)
 
   if (grid == NULL || updated_grid == NULL)
   {
-    printf("01_gol_cpu_serial.c: error while allocating memory for grids\n");
+    fprintf(stderr, "error while allocating memory for grids\n");
     return -1;
   }
 

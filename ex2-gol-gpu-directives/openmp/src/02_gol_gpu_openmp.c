@@ -233,6 +233,10 @@ int main(int argc, char **argv)
   start = init_time();
   float kernel_time = 0.0;
 
+  //debugging
+  printf("grid (CPU): initial\n");
+  visualise(VISUAL_ASCII, current_step, grid, n, m);
+
   // omp - move grid variables from cpu memory to gpu memory for the duration of
   // the loop
   // - `target` defines a task to perform on the gpu
@@ -244,10 +248,18 @@ int main(int argc, char **argv)
   // calculate final game_of_life state
   while (current_step != nsteps)
   {
+    //debugging
+#pragma omp target update from(grid[0:n*m])
 #pragma omp single
-    kernel_start = init_time();
+    {
+      printf("grid (GPU): %i\n", current_step);
+      visualise(VISUAL_ASCII, current_step, grid, n, m);
+    }
 
-    // perform game_of_life step
+#pragma omp single
+      kernel_start = init_time();
+
+      // perform game_of_life step
 #pragma omp target
 #pragma omp teams
 #pragma omp distribute parallel for collapse(2) schedule(static)
@@ -298,6 +310,9 @@ int main(int argc, char **argv)
   gpu_write_timing(opt, elapsed_time, kernel_time);
 
   // game_of_life_stats(opt, current_step, grid);
+
+  //debugging
+  printf("grid (CPU): final\n", current_step);
   visualise(VISUAL_ASCII, current_step, grid, n, m);
 
   // free memory

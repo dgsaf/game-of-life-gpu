@@ -159,6 +159,10 @@ int main(int argc, char **argv)
   // calculate final game_of_life state
   while (current_step != nsteps)
   {
+    //debugging
+    printf("grid (CPU): %i\n", current_step);
+    visualise(VISUAL_ASCII, current_step, grid, n, m);
+
     step_start = init_time();
 
     game_of_life(opt, grid, updated_grid, n, m);
@@ -180,6 +184,9 @@ int main(int argc, char **argv)
   cpu_write_timing(opt, elapsed_time);
 
   // game_of_life_stats(opt, current_step, grid);
+
+  //debugging
+  printf("grid (CPU): final\n");
   visualise(VISUAL_ASCII, current_step, grid, n, m);
 
   // free memory

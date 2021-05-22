@@ -17,6 +17,36 @@ inline void cuda_examine(cudaError_t code, const char * file, int line, \
   }
 }
 
+// debug flags
+// - `debug_verbose != 0` will annotate, to stderr, the program as it is
+//   executed
+// - `debug_timing != 0` will annotate, to stderr, the timing variables as
+//   they are calculated
+// - `debug_visual != 0` will annotate, to stderr, the ascii visualisation of
+//   grid variables as they are intialised and updated
+const int debug_verbose = 1;
+const int debug_timing = 1;
+const int debug_visual = 1;
+
+// verbose macro
+#define verbose(format, ...)                                \
+  if (debug_verbose) {                                      \
+    fprintf(stderr, "[verbose] "format"\n", ##__VA_ARGS__); \
+  }
+
+// timing macro
+#define timing(format, ...)                                 \
+  if (debug_timing) {                                       \
+    fprintf(stderr, "[timing] "format"\n", ##__VA_ARGS__);  \
+  }
+
+// visual macro
+#define visual(current_step, grid, n, m, format, ...)       \
+  if (debug_visual) {                                       \
+    fprintf(stderr, "[visual] "format"\n", ##__VA_ARGS__);  \
+    visualise_ascii(current_step, grid, n, m);              \
+  }
+
 __global__ void gpu_game_of_life_step(int *current_grid, int *next_grid, \
                                       int n, int m)
 {
@@ -194,46 +224,94 @@ int gpu_write_timing(struct Options const * opt, float const elapsed_time, \
 #ifndef INCLUDE_GPU_VERSION
 int main(int argc, char **argv)
 {
-  // read input parameters
+  // debug: verbose
+  verbose("<debug_verbose> = on");
+  if (debug_timing) verbose("<debug_timing> = on");
+  if (debug_visual) verbose("<debug_visual> = on");
+
+  // define timing variables
+  struct timeval start;
+  struct timeval gol_start;
+
+  // initialise timing of entire program execution
+  start = init_time();
+
+  verbose("program timing initialised");
+
+  // read input
   struct Options *opt = (struct Options *) malloc(sizeof(struct Options));
-
   getinput(argc, argv, opt);
-  int n = opt->n, m = opt->m, nsteps = opt->nsteps;
 
-  // generate initial conditions
+  verbose("read input");
+
+  // define parameter variables
+  const int n = opt->n;
+  const int m = opt->m;
+  const int nsteps = opt->nsteps;
+
+  verbose("parameters defined: <n> = %i, <m> = %i, <nsteps> = %i", \
+          n, m, nsteps);
+
+  // allocate memory for `initial_state` variable
   int *initial_state = (int *) malloc(sizeof(int) * n * m);
-  int *final_state = (int *) malloc(sizeof(int) * n * m);
+  //int *final_state = (int *) malloc(sizeof(int) * n * m);
 
-  if(!initial_state)
+  if (initial_state == NULL)
   {
-    printf("main: error while allocating memory.\n");
+    fprintf(stderr, "error while allocating memory for <initial_state>\n");
     return -1;
   }
 
+  verbose("<initial_state> memory allocated: sizeof(int) * %i", n * m);
+
+  // generate initial conditions
   generate_IC(opt->iictype, initial_state, n, m);
 
-  // initialise total timing
-  struct timeval start;
-  start = init_time();
+  verbose("<initial_state> initial conditions generated");
 
-  // calculate final state (and record kernel time)
+  // debug: visualise `intial_state` after initial conditions
+  visual(0, initial_state, n, m, "<initial_state> = ");
+
+  // initialise timing of GOL simulation
+  gol_start = init_time();
+
+  verbose("GOL simulation timing initialised");
+
+  // calculate `final_state` (and record kernel time)
   float kernel_time = 0.0;
   final_state = gpu_game_of_life(initial_state, n, m, nsteps, &kernel_time);
 
-  // finalise timing and write ouput
-  float elapsed_time = get_elapsed_time(start);
 
-  printf("Finished GOL in %f ms (%f%% of time in kernel)\n", elapsed_time, \
-         (100.0 * kernel_time / elapsed_time));
+  // calculate time for GOL simulation
+  float elapsed_time = get_elapsed_time(gol_start);
+  timing("<elapsed_time> = %f [ms]", elapsed_time);
+
+  // calculate kernel time
+  timing("<kernel_time> = %f [ms] / (%f%%)", kernel_time,
+         100.0*kernel_time/elapsed_time);
+
+  verbose("GOL simulation timing finished");
+
+  // write timing to file
   gpu_write_timing(opt, elapsed_time, kernel_time);
 
-  // visualise final state
-  // visualise(VISUAL_ASCII, nsteps, final_state, n, m);
+  verbose("<elapsed_time> written to file");
+
+  // debug: visualise `final_state` after loop completion
+  visual(nsteps, final_state, n, m, "<final_state> = ");
 
   // free cpu memory
   free(final_state);
   free(initial_state);
   free(opt);
+
+  verbose("memory freed");
+
+  // debug: calculate time for entire program execution
+  float total_time = get_elapsed_time(start);
+  timing("<total_time> = %f [ms]", total_time);
+
+  verbose("program timing finished");
 
   return 0;
 }

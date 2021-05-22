@@ -253,7 +253,7 @@ int main(int argc, char **argv)
 
   verbose("GOL simulation timing initialised");
 
-  // calculate final game_of_life state
+  // calculate `final_state`
   int *final_state = cpu_game_of_life(initial_state, n, m, nsteps);
 
   // calculate time for GOL simulation

@@ -135,14 +135,28 @@ int cpu_write_timing(struct Options const * opt, float const elapsed_time)
 
 int main(int argc, char **argv)
 {
-  // debug parameters
+  // debug flags
   const int debug_verbose = 1;
   const int debug_timing = 1;
   const int debug_visual = 1;
 
-#define prefix "> "
-#define verbose(format, ...) {                                      \
-    if (debug_verbose) {printf(prefix format"\n", ##__VA_ARGS__);}  \
+  // verbose macro
+#define verbose(format, ...)                                \
+  if (debug_verbose) {                                      \
+    fprintf(stderr, "[verbose] "format"\n", ##__VA_ARGS__); \
+  }
+
+  // timing macro
+#define timing(format, ...)                                 \
+  if (debug_timing) {                                       \
+    fprintf(stderr, "[timing] "format"\n", ##__VA_ARGS__);  \
+  }
+
+  // visual macro
+#define visual(current_step, grid, n, m, format, ...)       \
+  if (debug_visual) {                                       \
+    fprintf(stderr, "[visual] "format"\n", ##__VA_ARGS__);  \
+    visualise_ascii(current_step, grid, n, m);              \
   }
 
   // debug: verbose
@@ -200,11 +214,12 @@ int main(int argc, char **argv)
   verbose("<grid> initial conditions generated");
 
   // debug: visualise `grid` after initial conditions
-  if (debug_visual)
-  {
-    printf("<grid, initial> = \n", current_step);
-    visualise_ascii(current_step, grid, n, m);
-  }
+  visual(current_step, grid, n, m, "<grid, intial> = ");
+  /* if (debug_visual) */
+  /* { */
+  /*   printf("<grid, initial> = \n", current_step); */
+  /*   visualise_ascii(current_step, grid, n, m); */
+  /* } */
 
   // initialise timing of GOL simulation
   gol_start = init_time();
@@ -241,18 +256,11 @@ int main(int argc, char **argv)
     verbose("<%i> grids swapped", current_step);
 
     // debug: calculate time for this step in GOL simulation
-    if (debug_timing)
-    {
-      float step_time = get_elapsed_time(step_start);
-      printf("<step_time, %i> = %f [ms]\n", current_step, step_time);
-    }
+    float step_time = get_elapsed_time(step_start);
+    timing("<step_time, %i> = %f [ms]", current_step, step_time);
 
     // debug: visualise `grid` after current step
-    if (debug_visual)
-    {
-      printf("<grid, %i> = \n", current_step);
-      visualise_ascii(current_step, grid, n, m);
-    }
+    visual(current_step, grid, n, m, "<grid, %i> = ", current_step);
 
     // debug: verbose
     verbose("<%i> GOL loop finished", current_step);
@@ -263,27 +271,20 @@ int main(int argc, char **argv)
 
   // calculate time for GOL simulation
   float elapsed_time = get_elapsed_time(gol_start);
-  printf("<elapsed_time> = %f [ms]\n", elapsed_time);
+  timing("<elapsed_time> = %f [ms]", elapsed_time);
 
   // debug: verbose
   verbose("GOL simulation timing finished");
 
   // debug: calculate time for entire program execution
-  if (debug_timing)
-  {
-    float total_time = get_elapsed_time(start);
-    printf("<total_time> = %f [ms]\n", total_time);
-  }
+  float total_time = get_elapsed_time(start);
+  timing("<total_time> = %f [ms]", total_time);
 
   // debug: verbose
   verbose("program timing finished");
 
   // debug: visualise `grid` after loop completion
-  if (debug_visual)
-  {
-    printf("<grid, final> = \n", current_step);
-    visualise_ascii(current_step, grid, n, m);
-  }
+  visual(current_step, grid, n, m, "<grid, final> = ");
 
   // write total time to file
   cpu_write_timing(opt, elapsed_time);

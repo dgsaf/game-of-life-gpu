@@ -146,6 +146,20 @@ int* gpu_game_of_life(const int *initial_state, int n, int m, int nsteps, \
 
   verbose ("CUDA: <kernel_start>, <kernel_stop> CUDA events defined");
 
+  // prepare grid on cpu for visualisation (if visually debugging)
+  if (debug_visual)
+  {
+    int* grid_cpu = (int *) malloc(sizeof(int) * n * m);
+
+    if (grid_cpu == NULL)
+    {
+      fprintf(stderr, "error while allocating memory for <grid_cpu>\n");
+      exit (1);
+    }
+
+    verbose("CUDA: <grid_cpu> memory allocated: sizeof(int) * %i", n * m);
+  }
+
   // initialise game_of_life loop
   int current_step = 0;
 
@@ -167,7 +181,7 @@ int* gpu_game_of_life(const int *initial_state, int n, int m, int nsteps, \
 
     // finalise timing of kernel execution
     cuda_error_check(cudaEventRecord(kernel_stop));
-    cuda_error_check(cudaDeviceSynchronize(kernel_stop));
+    cuda_error_check(cudaDeviceSynchronize());
 
     // swap current and updated grid
     {
@@ -188,7 +202,12 @@ int* gpu_game_of_life(const int *initial_state, int n, int m, int nsteps, \
     // debug: visualise `grid` after current step
     if (debug_visual)
     {
-      visual(current_step, grid, n, m, "<grid, %i> = ", current_step);
+      cuda_error_check(cudaMemcpy(grid_cpu, grid, sizeof(int) * n * m, \
+                                  cudaMemcpyDeviceToHost));
+
+      verbose ("CUDA: copied <grid> (GPU) to <grid_cpu> (CPU)");
+
+      visual(current_step, grid_cpu, n, m, "<grid_cpu, %i> = ", current_step);
     }
 
     verbose("CUDA: <%i> GOL step finished", current_step);
@@ -209,6 +228,14 @@ int* gpu_game_of_life(const int *initial_state, int n, int m, int nsteps, \
                               cudaMemcpyDeviceToHost));
 
   verbose ("CUDA: copied <grid> (GPU) to <final_state> (CPU)");
+
+  // free cpu memory
+  if (debug_visual)
+  {
+    free(grid_cpu);
+
+    verbose("CUDA: <grid_cpu> memory freed (CPU)");
+  }
 
   // free gpu memory
   cudaFree(updated_grid);

@@ -226,6 +226,9 @@ int main(int argc, char **argv)
   // GOL simulation loop
   while (current_step != nsteps)
   {
+    // increment step counter
+    current_step++;
+
     verbose("<%i> GOL step started", current_step);
 
     // initialise timing of current step in GOL simulation
@@ -255,9 +258,6 @@ int main(int argc, char **argv)
     visual(current_step, grid, n, m, "<grid, %i> = ", current_step);
 
     verbose("<%i> GOL step finished", current_step);
-
-    // increment step counter
-    current_step++;
   }
 
   // calculate time for GOL simulation

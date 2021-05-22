@@ -28,7 +28,6 @@ else
         ON)
             srun --export=all -u -n 1 bin/01_gol_cpu_serial ${n} ${m} ${nsteps}
             ;;
-
         OFF)
             srun --export=all -u -n 1 bin/01_gol_cpu_serial ${n} ${m} ${nsteps}
             ;;

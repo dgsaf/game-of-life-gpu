@@ -13,6 +13,9 @@ module load gcc/8.3.0
 module load cuda/10.2
 module load cascadelake
 
+# run with `PROFILER`=(ON|OFF) flag
+PROFILER="ON"
+
 # make binary
 srun --export=all -u -n 1 make bin/game_of_life_cuda
 
@@ -21,5 +24,16 @@ if [ -z "${n}" ] || [ -z "${m}" ] || [ -z "${nsteps}" ]
 then
     echo "gpu.slurm: missing arguments"
 else
-    srun --export=all -u -n 1 bin/game_of_life_cuda ${n} ${m} ${nsteps}
+    case "${PROFILER}" in
+        ON)
+            srun --export=all -u -n 1 nvprof \
+                 bin/game_of_life_cuda ${n} ${m} ${nsteps}
+            ;;
+        OFF)
+            srun --export=all -u -n 1 bin/game_of_life_cuda ${n} ${m} ${nsteps}
+            ;;
+        *)
+            echo "gpu.slurm: profiler not set to one of (ON|OFF)"
+            ;;
+    esac
 fi

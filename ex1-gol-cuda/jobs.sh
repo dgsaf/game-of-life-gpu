@@ -1,6 +1,7 @@
 #!/bin/bash --login
 
 # load modules
+module purge
 module load gcc/8.3.0
 module load cuda/10.2
 

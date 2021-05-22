@@ -29,7 +29,6 @@ else
             srun --export=all -u -n 1 nvprof \
                  bin/02_gol_gpu_openacc ${n} ${m} ${nsteps}
             ;;
-
         OFF)
             srun --export=all -u -n 1 bin/02_gol_gpu_openacc ${n} ${m} ${nsteps}
             ;;

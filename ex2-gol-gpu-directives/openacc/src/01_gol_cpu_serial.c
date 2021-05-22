@@ -136,6 +136,12 @@ int cpu_write_timing(struct Options const * opt, float const elapsed_time)
 int main(int argc, char **argv)
 {
   // debug flags
+  // - `debug_verbose != 0` will annotate, to stderr, the program as it is
+  //   executed
+  // - `debug_timing != 0` will annotate, to stderr, the timing variables as
+  //   they are calculated
+  // - `debug_visual != 0` will annotate, to stderr, the ascii visualisation of
+  //   grid variables as they are intialised and updated
   const int debug_verbose = 1;
   const int debug_timing = 1;
   const int debug_visual = 1;
@@ -215,11 +221,6 @@ int main(int argc, char **argv)
 
   // debug: visualise `grid` after initial conditions
   visual(current_step, grid, n, m, "<grid, intial> = ");
-  /* if (debug_visual) */
-  /* { */
-  /*   printf("<grid, initial> = \n", current_step); */
-  /*   visualise_ascii(current_step, grid, n, m); */
-  /* } */
 
   // initialise timing of GOL simulation
   gol_start = init_time();

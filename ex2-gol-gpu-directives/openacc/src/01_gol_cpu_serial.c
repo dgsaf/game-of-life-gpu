@@ -254,11 +254,11 @@ int main(int argc, char **argv)
       visualise_ascii(current_step, grid, n, m);
     }
 
-    // increment step counter
-    current_step++;
-
     // debug: verbose
     verbose("<%i> GOL loop finished", current_step);
+
+    // increment step counter
+    current_step++;
   }
 
   // calculate time for GOL simulation

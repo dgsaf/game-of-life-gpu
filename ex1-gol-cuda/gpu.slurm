@@ -14,7 +14,7 @@ module load cuda/10.2
 module load cascadelake
 
 # run with `PROFILER`=(ON|OFF) flag
-PROFILER="ON"
+PROFILER="OFF"
 
 # make binary
 srun --export=all -u -n 1 make bin/game_of_life_cuda

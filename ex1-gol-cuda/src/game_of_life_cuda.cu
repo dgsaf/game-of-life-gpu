@@ -26,7 +26,7 @@ inline void cuda_examine(cudaError_t code, const char * file, int line, \
 //   grid variables as they are intialised and updated
 const int debug_verbose = 1;
 const int debug_timing = 1;
-const int debug_visual = 1;
+const int debug_visual = 0;
 
 // verbose macro
 #define verbose(format, ...)                                \
@@ -147,9 +147,10 @@ int* gpu_game_of_life(const int *initial_state, int n, int m, int nsteps, \
   verbose ("CUDA: <kernel_start>, <kernel_stop> CUDA events defined");
 
   // prepare grid on cpu for visualisation (if visually debugging)
+  int* grid_cpu = NULL;
   if (debug_visual)
   {
-    int* grid_cpu = (int *) malloc(sizeof(int) * n * m);
+    grid_cpu = (int *) malloc(sizeof(int) * n * m);
 
     if (grid_cpu == NULL)
     {

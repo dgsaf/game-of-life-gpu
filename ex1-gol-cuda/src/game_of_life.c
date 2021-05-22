@@ -9,7 +9,7 @@
 //   grid variables as they are intialised and updated
 const int debug_verbose = 1;
 const int debug_timing = 1;
-const int debug_visual = 1;
+const int debug_visual = 0;
 
 // verbose macro
 #define verbose(format, ...)                                \

@@ -177,7 +177,7 @@ int main(int argc, char **argv)
   if (debug_visual)
   {
     printf("<grid, initial> = \n", current_step);
-    visualise(VISUAL_ASCII, current_step, grid, n, m);
+    visualise_ascii(current_step, grid, n, m);
   }
 
   // initialise timing of GOL simulation
@@ -210,7 +210,7 @@ int main(int argc, char **argv)
     if (debug_visual)
     {
       printf("<grid, %i> = \n", current_step);
-      visualise(VISUAL_ASCII, current_step, grid, n, m);
+      visualise_ascii(current_step, grid, n, m);
     }
 
     // increment step counter
@@ -232,7 +232,7 @@ int main(int argc, char **argv)
   if (debug_visual)
   {
     printf("<grid, final> = \n", current_step);
-    visualise(VISUAL_ASCII, current_step, grid, n, m);
+    visualise_ascii(current_step, grid, n, m);
   }
 
   // write total time to file

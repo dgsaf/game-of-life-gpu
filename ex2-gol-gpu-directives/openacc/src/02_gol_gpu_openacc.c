@@ -294,7 +294,8 @@ int main(int argc, char **argv)
 #pragma acc enter data copyin(grid[0:n*m]) create(updated_grid[0:n*m])
 
   // debug: calculate time for OpenACC data transfer in
-  timing("<transfer_time> = %f [ms]", get_elapsed_time(transfer_start));
+  float transfer_time = get_elapsed_time(transfer_start);
+  timing("<transfer_time> = %f [ms]", transfer_time);
 
   verbose("OpenACC: <grid> copied to gpu, <updated_grid> allocated on gpu");
 
@@ -346,7 +347,8 @@ int main(int argc, char **argv)
 
 #pragma acc update self(grid[0:n*m])
 
-      timing("<transfer_time> = %f [ms]", get_elapsed_time(transfer_start));
+      transfer_time = get_elapsed_time(transfer_start);
+      timing("<transfer_time> = %f [ms]", transfer_time);
 
       verbose("OpenACC: <%i> updated <grid> on host", current_step);
     }
@@ -367,7 +369,8 @@ int main(int argc, char **argv)
 #pragma acc exit data copyout(grid[0:n*m]) delete(updated_grid[0:n*m])
 
   // debug: calculate time for OpenACC data transfer out
-  timing("<transfer_time> = %f [ms]", get_elapsed_time(transfer_start));
+  transfer_time = get_elasped_time(transfer_start);
+  timing("<transfer_time> = %f [ms]", transfer_time);
 
   verbose("OpenACC: <grid> copied from gpu, <updated_grid> deleted on gpu");
 

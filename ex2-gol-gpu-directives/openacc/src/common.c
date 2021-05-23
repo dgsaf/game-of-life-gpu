@@ -15,8 +15,11 @@ void visualise(enum VisualiseType ivisualisetype, int step, int *grid, int n, in
 void visualise_ascii(int step, int *grid, int n, int m)
 {
   // live and dead cell chars
-  const char dead_char = ' ';
-  const char live_char = '*';
+  const char dead_char = '-';
+  const char live_char = '#';
+
+  // flag indicating whether or not to wrap the grid with a border
+  const int print_border = 1;
 
   // maximum number of grid cells to show for each dimension
   const int visual_n_max = 20;
@@ -46,14 +49,45 @@ void visualise_ascii(int step, int *grid, int n, int m)
     truncate_m = 1;
   }
 
+  // collect ASCII visualisation in a buffer string
+  const int max_chars = (3 * (visual_m_max+n_dots) + 2)
+    * (visual_n_max + n_dots + 2);
+  char *buffer = (char*) malloc(sizeof(char) * max_chars);
+  int length = 0;
+
+  // top border
+  if (print_border)
+  {
+    length += snprintf(buffer+length, max_chars-length, "+");
+    for (int j = 0; j < m_max; j++)
+    {
+      length += snprintf(buffer+length, max_chars-length, "---");
+    }
+    if (truncate_m)
+    {
+      for (int j = 0; j < n_dots; j++)
+      {
+        length += snprintf(buffer+length, max_chars-length, "---");
+      }
+    }
+    length += snprintf(buffer+length, max_chars-length, "+\n");
+  }
+
   // print cells (truncate at (n_max, m_max))
   for (int i = 0; i < n_max; i++)
   {
+    // left border
+    if (print_border)
+    {
+      length += snprintf(buffer+length, max_chars-length, "|");
+    }
+
     for (int j = 0; j < m_max; j++)
     {
       char cell = dead_char;
       if (grid[i*m + j] == ALIVE) cell = live_char;
-      printf(" %c ", cell);
+
+      length += snprintf(buffer+length, max_chars-length, " %c ", cell);
     }
 
     // if rows are truncated, append with a number of " `dot` "
@@ -61,11 +95,17 @@ void visualise_ascii(int step, int *grid, int n, int m)
     {
       for (int j = 0; j < n_dots; j++)
       {
-        printf(" %c ", dot);
+        length += snprintf(buffer+length, max_chars-length, " %c ", dot);
       }
     }
 
-    printf("\n");
+    // right border
+    if (print_border)
+    {
+      length += snprintf(buffer+length, max_chars-length, "|");
+    }
+
+    length += snprintf(buffer+length, max_chars-length, "\n");
   }
 
   // if columns are truncated, append with a number of " `dot` "
@@ -73,9 +113,15 @@ void visualise_ascii(int step, int *grid, int n, int m)
   {
     for (int i = 0; i < n_dots; i++)
     {
+      // left border
+      if (print_border)
+      {
+        length += snprintf(buffer+length, max_chars-length, "|");
+      }
+
       for (int j = 0; j < m_max; j++)
       {
-        printf(" %c ", dot);
+        length += snprintf(buffer+length, max_chars-length, " %c ", dot);
       }
 
       // if rows are truncated, append with a number of " `dot` "
@@ -83,13 +129,39 @@ void visualise_ascii(int step, int *grid, int n, int m)
       {
         for (int j = 0; j < n_dots; j++)
         {
-          printf(" %c ", dot);
+          length += snprintf(buffer+length, max_chars-length, " %c ", dot);
         }
       }
 
-      printf("\n");
+      // right border
+      if (print_border)
+      {
+        length += snprintf(buffer+length, max_chars-length, "|");
+      }
+
+      length += snprintf(buffer+length, max_chars-length, "\n");
     }
   }
+
+  // bottom border
+  if (print_border)
+  {
+    length += snprintf(buffer+length, max_chars-length, "+");
+    for (int j = 0; j < m_max; j++)
+    {
+      length += snprintf(buffer+length, max_chars-length, "---");
+    }
+    if (truncate_m)
+    {
+      for (int j = 0; j < n_dots; j++)
+      {
+        length += snprintf(buffer+length, max_chars-length, "---");
+      }
+    }
+    length += snprintf(buffer+length, max_chars-length, "+\n");
+  }
+
+  printf("%s", buffer);
 }
 
 void visualise_png(int step, int *grid, int n, int m){

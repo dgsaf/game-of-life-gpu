@@ -314,6 +314,14 @@ int main(int argc, char **argv)
     verbose("<%i> timing initialised", current_step);
 
     // calculate next state of grid according to GOL update rules
+    // - `parallel loop` indicates to the compiler that loop is safe to
+    //   parallelise (however the compiler will only parallelise the top loop
+    //   due to the unrolled indexing - we must also indicate that inner loop is
+    //   safe to parallelise too)
+    // - `independent` indicates that the iterations are independent of each
+    //   other (this is implicit for parallel loops, but we make it explicit)
+    // - `loop` indicates to the compiler that the inner loop should also be
+    //   parallelised
 #pragma acc parallel loop independent present(grid, updated_grid)
     for (int i = 0; i < n; i++)
     {
@@ -351,6 +359,7 @@ int main(int argc, char **argv)
 
       verbose("OpenACC: <%i> <grid> update timing initialised", current_step);
 
+      // update `grid` on cpu so that it can be visualised
 #pragma acc update self(grid[0:n*m])
 
       transfer_time = get_elapsed_time(transfer_start);

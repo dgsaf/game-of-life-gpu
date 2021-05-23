@@ -22,8 +22,8 @@ void visualise_ascii(int step, int *grid, int n, int m)
   const int print_border = 1;
 
   // maximum number of grid cells to show for each dimension
-  const int visual_n_max = 20;
-  const int visual_m_max = 20;
+  const int visual_n_max = 30;
+  const int visual_m_max = 30;
 
   // truncation char `dot`, and number of `dot`s to print to indicate truncation
   const char dot = '.';
@@ -50,9 +50,8 @@ void visualise_ascii(int step, int *grid, int n, int m)
   }
 
   // collect ASCII visualisation in a buffer string
-  const int max_chars = (3 * (visual_m_max+n_dots) + 2)
-    * (visual_n_max + n_dots + 2);
-  char *buffer = (char*) malloc(sizeof(char) * max_chars);
+  const int max_chars = (3*(visual_m_max+n_dots)+3)*(visual_n_max+n_dots+2)+1;
+  char *buffer = (char *) malloc(sizeof(char) * max_chars);
   int length = 0;
 
   // top border

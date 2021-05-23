@@ -12,26 +12,32 @@ void visualise(enum VisualiseType ivisualisetype, int step, int *grid, int n, in
 /// ascii visualisation
 // modified to truncate ascii output (for visualising at least part of a large
 // grid)
-void visualise_ascii(int step, int *grid, int n, int m){
+void visualise_ascii(int step, int *grid, int n, int m)
+{
+  // live and dead cell chars
+  const char dead_char = ' ';
+  const char live_char = '*';
+
   // maximum number of grid cells to show for each dimension
   const int visual_n_max = 20;
   const int visual_m_max = 20;
 
-  int n_max;
-  int m_max;
+  // truncation char `dot`, and number of `dot`s to print to indicate truncation
+  const char dot = '.';
+  const int n_dots = 2;
 
-  int truncate_n;
-  int truncate_m;
+  // n_max = min(n, visual_n_max), m_max = min(m, visual_m_max)
+  int n_max = n;
+  int m_max = m;
+
+  // flags indicate whether truncation is needed
+  int truncate_n = 0;
+  int truncate_m = 0;
 
   if (n > visual_n_max)
   {
     n_max = visual_n_max;
     truncate_n = 1;
-  }
-  else
-  {
-    n_max = n;
-    truncate_n = 0;
   }
 
   if (m > visual_m_max)
@@ -39,59 +45,51 @@ void visualise_ascii(int step, int *grid, int n, int m){
     m_max = visual_m_max;
     truncate_m = 1;
   }
-  else
-  {
-    m_max = m;
-    truncate_m = 0;
-  }
 
-  // print cells up to maximum showable dimension
+  // print cells (truncate at (n_max, m_max))
   for (int i = 0; i < n_max; i++)
   {
     for (int j = 0; j < m_max; j++)
     {
-      char cell = ' ';
-      if (grid[i*m + j] == ALIVE) cell = '*';
+      char cell = dead_char;
+      if (grid[i*m + j] == ALIVE) cell = live_char;
       printf(" %c ", cell);
     }
 
-    // if more columns than can be shown, append each row with '. .'
+    // if rows are truncated, append with a number of " `dot` "
     if (truncate_m)
     {
-      printf(" .  . \n");
+      for (int j = 0; j < n_dots; j++)
+      {
+        printf(" %c ", dot);
+      }
     }
-    else
-    {
-      printf("\n");
-    }
+
+    printf("\n");
   }
 
-  // if more rows than can be shown, append each column with '. .'
-  if (truncate_m)
+  // if columns are truncated, append with a number of " `dot` "
+  if (truncate_n)
   {
-    const int n_dots = 2;
     for (int i = 0; i < n_dots; i++)
     {
-      for (int j = 0; j < m_max + n_dots; j++)
+      for (int j = 0; j < m_max; j++)
       {
-        printf(" . ");
+        printf(" %c ", dot);
       }
+
+      // if rows are truncated, append with a number of " `dot` "
+      if (truncate_m)
+      {
+        for (int j = 0; j < n_dots; j++)
+        {
+          printf(" %c ", dot);
+        }
+      }
+
       printf("\n");
     }
   }
-
-  /* printf("Game of Life\n"); */
-  /* printf("Step %d:\n", step); */
-  /* for(int i = 0; i < n; i++) */
-  /* { */
-  /*   for(int j = 0; j < m; j++) */
-  /*   { */
-  /*     char cell = ' '; */
-  /*     if (grid[i*m + j] == ALIVE) cell = '*'; */
-  /*     printf(" %c ", cell); */
-  /*   } */
-  /*   printf("\n"); */
-  /* } */
 }
 
 void visualise_png(int step, int *grid, int n, int m){

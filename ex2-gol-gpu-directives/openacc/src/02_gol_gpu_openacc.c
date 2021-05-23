@@ -1,7 +1,8 @@
 #include "common.h"
 
 // count number of living neighbours around cell (i, j)
-int gol_neighbours(int const * const current_grid, int n, int m, int i, int j)
+int gol_neighbours(int const * const restrict current_grid, int n, int m,
+                   int i, int j)
 {
   int neighbours;
   int n_i[8], n_j[8];

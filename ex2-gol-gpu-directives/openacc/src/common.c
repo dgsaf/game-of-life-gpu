@@ -69,9 +69,10 @@ void visualise_ascii(int step, int *grid, int n, int m){
   // if more rows than can be shown, append each column with '. .'
   if (truncate_m)
   {
-    for (int i = 0; i < 2; i++)
+    const int n_dots = 2;
+    for (int i = 0; i < n_dots; i++)
     {
-      for (int j = 0; j < m_max; j++)
+      for (int j = 0; j < m_max + n_dots; j++)
       {
         printf(" . ");
       }

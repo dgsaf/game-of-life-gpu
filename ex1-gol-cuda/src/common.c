@@ -18,16 +18,18 @@ void visualise_ascii(int step, int *grid, int n, int m)
   const char dead_char = '-';
   const char live_char = '#';
 
+  // truncation char `dot`, and number of `dot`s to print to indicate truncation
+  const char dot = '.';
+  const int n_dots = 2;
+
   // flag indicating whether or not to wrap the grid with a border
   const int print_border = 1;
 
   // maximum number of grid cells to show for each dimension
-  const int visual_n_max = 30;
-  const int visual_m_max = 30;
-
-  // truncation char `dot`, and number of `dot`s to print to indicate truncation
-  const char dot = '.';
-  const int n_dots = 2;
+  // visual_m_max is selected such that the visualisation of the grid is no more
+  // than 80 characters wide
+  const int visual_m_max = 26 - n_dots;
+  const int visual_n_max = visual_m_max;
 
   // n_max = min(n, visual_n_max), m_max = min(m, visual_m_max)
   int n_max = n;

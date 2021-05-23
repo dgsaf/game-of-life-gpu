@@ -142,8 +142,8 @@ int main(int argc, char **argv)
   //   they are calculated
   // - `debug_visual != 0` will annotate, to stderr, the ascii visualisation of
   //   grid variables as they are intialised and updated
-  const int debug_verbose = 1;
-  const int debug_timing = 1;
+  const int debug_verbose = 0;
+  const int debug_timing = 0;
   const int debug_visual = 0;
 
   // verbose macro

@@ -7,8 +7,8 @@
 //   they are calculated
 // - `debug_visual != 0` will annotate, to stderr, the ascii visualisation of
 //   grid variables as they are intialised and updated
-const int debug_verbose = 0;
-const int debug_timing = 0;
+const int debug_verbose = 1;
+const int debug_timing = 1;
 const int debug_visual = 0;
 
 // verbose macro
@@ -34,9 +34,9 @@ void cpu_game_of_life_step(int *current_grid, int *next_grid, int n, int m)
 {
   int neighbours;
   int n_i[8], n_j[8];
-  for(int i = 0; i < n; i++)
+  for (int i = 0; i < n; i++)
   {
-    for(int j = 0; j < m; j++)
+    for (int j = 0; j < m; j++)
     {
       // count the number of neighbours, clockwise around the current cell.
       neighbours = 0;

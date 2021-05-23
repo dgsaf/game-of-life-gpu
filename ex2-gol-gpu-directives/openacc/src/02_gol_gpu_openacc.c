@@ -314,13 +314,15 @@ int main(int argc, char **argv)
     verbose("<%i> timing initialised", current_step);
 
     // calculate next state of grid according to GOL update rules
-#pragma acc parallel loop present(grid, updated_grid)
+#pragma acc parallel loop independent present(grid, updated_grid)
     for (int i = 0; i < n; i++)
     {
+#pragma acc loop independent
       for (int j = 0; j < m; j++)
       {
-        updated_grid[i*m + j] = gol_update(grid[i*m + j],
-                                           gol_neighbours(grid, n, m, i, j));
+        const int neighbours = gol_neighbours(grid, n, m, i, j);
+        const int state = grid[i*m + j];
+        updated_grid[i*m + j] = gol_update(state, neighbours);
       }
     }
 

@@ -17,7 +17,7 @@ module load cascadelake
 PROFILER="OFF"
 
 # make binary
-srun --export=all -u -n 1 make bin/02_gol_gpu_openacc PROFILER=${PROFILER}
+srun --export=all -u -n 1 make bin/02_gol_gpu_openacc
 
 # check if `n`, `m`, `nsteps` have been supplied to this script before executing
 if [ -z "${n}" ] || [ -z "${m}" ] || [ -z "${nsteps}" ]

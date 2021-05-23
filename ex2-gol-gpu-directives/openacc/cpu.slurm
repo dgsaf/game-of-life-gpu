@@ -13,11 +13,11 @@ module load pgi
 module load cuda
 module load cascadelake
 
-# run with PROFILER=(ON|OFF) flag
+# run with `PROFILER`=(ON|OFF) flag
 PROFILER="OFF"
 
 # make binary
-srun --export=all -u -n 1 make bin/01_gol_cpu_serial PROFILER=${PROFILER}
+srun --export=all -u -n 1 make bin/01_gol_cpu_serial
 
 # check if `n`, `m`, `nsteps` have been supplied to this script before executing
 if [ -z "${n}" ] || [ -z "${m}" ] || [ -z "${nsteps}" ]

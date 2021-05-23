@@ -23,7 +23,7 @@ inline void cuda_examine(cudaError_t code, const char * file, int line, \
 // - `debug_timing != 0` will annotate, to stderr, the timing variables as
 //   they are calculated
 // - `debug_visual != 0` will annotate, to stderr, the ascii visualisation of
-//   grid variables as they are intialised and updated
+//   grid variables as they are initialised and updated
 const int debug_verbose = 1;
 const int debug_timing = 1;
 const int debug_visual = 0;
@@ -134,7 +134,7 @@ int* gpu_game_of_life(const int *initial_state, int n, int m, int nsteps, \
   cuda_error_check(cudaMemcpy(grid, initial_state, sizeof(int) * n * m, \
                               cudaMemcpyHostToDevice));
 
-  verbose ("CUDA: copied <intial_state> (CPU) to <grid> (GPU)");
+  verbose ("CUDA: copied <initial_state> (CPU) to <grid> (GPU)");
 
   // prepare kernel timing variables
   *kernel_time = 0.0;
@@ -173,7 +173,7 @@ int* gpu_game_of_life(const int *initial_state, int n, int m, int nsteps, \
     // initialise timing of kernel execution
     cuda_error_check(cudaEventRecord(kernel_start));
 
-    verbose("CUDA: <%i> timing intialised", current_step);
+    verbose("CUDA: <%i> timing initalised", current_step);
 
     // calculate next state of GOL using CUDA kernel across grid
     gpu_game_of_life_step<<<n_blocks, n_threads>>>(grid, updated_grid, n, m);
@@ -331,7 +331,7 @@ int main(int argc, char **argv)
 
   verbose("<initial_state> initial conditions generated");
 
-  // debug: visualise `intial_state` after initial conditions
+  // debug: visualise `inital_state` after initial conditions
   visual(0, initial_state, n, m, "<initial_state> = ");
 
   // initialise timing of GOL simulation

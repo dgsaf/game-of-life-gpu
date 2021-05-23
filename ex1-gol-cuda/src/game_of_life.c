@@ -6,7 +6,7 @@
 // - `debug_timing != 0` will annotate, to stderr, the timing variables as
 //   they are calculated
 // - `debug_visual != 0` will annotate, to stderr, the ascii visualisation of
-//   grid variables as they are intialised and updated
+//   grid variables as they are initialised and updated
 const int debug_verbose = 1;
 const int debug_timing = 1;
 const int debug_visual = 0;
@@ -242,7 +242,7 @@ int main(int argc, char **argv)
 
   verbose("<initial_state> initial conditions generated");
 
-  // debug: visualise `intial_state` after initial conditions
+  // debug: visualise `initial_state` after initial conditions
   visual(0, initial_state, n, m, "<initial_state> = ");
 
   // initialise timing of GOL simulation

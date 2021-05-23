@@ -1,0 +1,3 @@
+# gpu_elapsed_time, gpu_kernel_time
+# [ms], [ms]
+197.358002, 2.340000

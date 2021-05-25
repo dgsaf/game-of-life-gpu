@@ -42,6 +42,8 @@
   basicstyle=\ttfamily\normalsize\color{orange}
 }
 
+\newcommand{\lilf}[1]{\lstinline[style=ff]{#1}}
+
 % - Title
 \title{PHYS4004 - Assignment 3 - Game of Life (GPU)}
 \author{Tom Ross - 1834 2884}
@@ -68,5 +70,69 @@
 
 The entire code repository can be found at
 \url{https://github.com/dgsaf/game-of-life-gpu}.
+Conway's Game of Life has been accelerated using GPU programming with two
+schemes, CUDA and OpenACC.
+The code has been derived from the original code which was provided by Cristian
+Di Pietrantonio, and Maciej Cytowski.
+It consists of the following items of interest:
+\begin{itemize}
+\item \lilf{report/}:
+  The directory containing this \lilf{tex} and its resulting \lilf{pdf}
+  document.
+
+\item \lilf{ex1-gol-cuda/}, \lilf{ex2-gol-gpu-directives/openacc/}:
+  Both the CUDA and OpenACC directories have a similar structure, which consists
+  of:
+
+  \begin{itemize}
+  \item \lilf{cpu.slurm}:
+    A \lilf{slurm} script for submitting CPU jobs on Topaz, for given
+    \lstinline{n, m, nsteps}.
+    The CPU code timing output, recorded in [\si{\milli\second}], is written to
+    \lstinline{output/timing-cpu.n-<n>.m-<m>.nsteps-<nsteps>.txt}.
+
+  \item \lilf{gpu.slurm}:
+    A \lilf{slurm} script for submitting GPU CUDA jobs on Topaz, for given
+    \lstinline{n, m, nsteps}.
+    The GPU code timing output, recorded in [\si{\milli\second}], is written to
+    \lilf{output/timing-gpu-cuda.n-<n>.m-<m>.nsteps-<nsteps>.txt} for the CUDA
+    code, and \lilf{output/timing-gpu-openacc.n-<n>.m-<m>.nsteps-<nsteps>.txt}
+    for the OpenACC code.
+
+  \item \lilf{jobs.sh}:
+    A \lilf{bash} script which batches a set of jobs, for both
+    the CPU and the GPU codes, on Topaz, for \lstinline{nsteps = 100} and
+    \lstinline{n = m = 1, 2, 4, 8, ..., 16384}.
+
+  \item \lilf{extract.sh}:
+    A \lilf{bash} script which, from the jobs batched in \lilf{jobs.sh},
+    \lstinline{n = m = 1, 2, 4, 8, ..., 16384}, extracts the timing output
+    \lstinline{cpu_elapsed_time, cpu_elapsed_time, kernel_time}, calculates
+    \lstinline{speedup}, and writes this performance evaluation to
+    \lilf{output/performance.nsteps-<nsteps>.txt}.
+
+  \item \lilf{output/performance.txt}:
+    A \lilf{txt} file which, after the jobs have been submitted and the timing
+    output extracted, contains for each job
+    \lstinline{n = m = 1, 2, 4, 8, ..., 16384} the performance characteristics
+    \lstinline{cpu_elapsed_time, cpu_elapsed_time, speedup, kernel_time}.
+  \end{itemize}
+\end{itemize}
+
+\section{CPU Code}
+\label{sec:cpu-code}
+
+\section{GPU Code}
+\label{sec:Gpu-code}
+
+\subsection{CUDA Code}
+\label{sec:cuda-code}
+
+% figure - performance
+
+\subsection{OpenACC Code}
+\label{sec:cpu-code}
+
+% figure - performance
 
 \end{document}

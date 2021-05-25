@@ -315,6 +315,37 @@ in \autoref{fig:cuda-performance}.
   \label{fig:cuda-performance}
 \end{figure}
 
+It can be seen that the CPU code is more performant that the GPU-OpenACC code
+for small grid sizes up to \lstinline{n = m = 512}.
+We note also that is scales exponentially with the grid size, for all grid
+sizes.
+It can be seen that OpenACC code is uniformly performant for grid sizes up
+to \lstinline{n = m = 4096}, at which point it begins to scale exponentially
+with the grid size, but at a slower rate than the CPU code.
+It can also be seen that \lstinline{kernel_time} is significantly smaller than
+\lstinline{gpu_elapsed_time}, and is uniform for grid sizes up to
+\lstinline{n = m = 512}, at which point it begins to scale exponentially with
+the grid size, until it converges with \lstinline{gpu_elapsed_time}.
+
+This behaviour reflects the nature of GPU programming, in that
+\lstinline{gpu_elapsed_time} can be separated into the time spent setting up the
+computation on the GPU, \lstinline{setup_time}, and the time it actually takes
+the GPU to perform the computation, \lstinline{kernel_time}; that is,
+\lstinline{gpu_elapsed_time = setup_time + kernel_time}.
+Typically, \lstinline{setup_time} scales constantly with grid size, since it's
+limiting factor is usually the I/O between the CPU and the GPU, memory
+allocation, et cetera.
+
+For small grid sizes, \lstinline{kernel_time} is significantly smaller than
+\lstinline{setup_time}, and so \lstinline{gpu_elapsed_time} scales constantly
+with grid size.
+For larger grid sizes, \lstinline{kernel_time} increases as the GPU
+computational overhead increases, and as the GPU blocks begin to be allocated
+larger sections of the grid to work on.
+Hence, \lstinline{gpu_elapsed_time} will tend to be pre-dominated by
+\lstinline{kernel_time} past a certain grid size, and begin scaling
+exponentially.
+
 \clearpage
 \subsection{OpenACC Code}
 \label{sec:cpu-code}
@@ -452,20 +483,16 @@ It can be seen that the CPU code is more performant that the GPU-OpenACC code
 for small grid sizes up to \lstinline{n = m = 512}.
 We note also that is scales exponentially with the grid size, for all grid
 sizes.
-
 It can be seen that OpenACC code is uniformly performant for grid sizes up
 to \lstinline{n = m = 4096}, at which point it begins to scale exponentially
 with the grid size, but at a slower rate than the CPU code.
-
 It can also be seen that \lstinline{kernel_time} is significantly smaller than
-\lstinline{elapsed_time}, and is uniform for grid sizes up to
+\lstinline{gpu_elapsed_time}, and is uniform for grid sizes up to
 \lstinline{n = m = 512}, at which point it begins to scale exponentially with
-the grid size, until it converges with \lstinline{elapsed_time}.
-This behaviour reflects the fact that for small grid sizes, the amount of
-computation required is relatively small, and thus the majority of time
-is spent allocating memory, control flow, et cetera, and not in the kernel.
-However, as the grid size increases, the amount of computation required
-increases, and so the majority of time increasingly tends to be spent in the
-kernel.
+the grid size, until it converges with \lstinline{gpu_elapsed_time}.
+
+This behaviour reflects the nature of GPU programming, and was discussed in
+detail in \autoref{sec:cuda-code} with regard to the CUDA code, but is similar
+for the OpenACC code also.
 
 \end{document}

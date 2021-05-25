@@ -36,18 +36,27 @@ void cpu_game_of_life_step(int *current_grid, int *next_grid, int n, int m)
   int n_i[8], n_j[8];
   for (int i = 0; i < n; i++)
   {
+    n_i[0] = i - 1;
+    n_i[1] = i - 1;
+    n_i[2] = i - 1;
+    n_i[3] = i;
+    n_i[4] = i + 1;
+    n_i[5] = i + 1;
+    n_i[6] = i + 1;
+    n_i[7] = i;
+
     for (int j = 0; j < m; j++)
     {
       // count the number of neighbours, clockwise around the current cell.
       neighbours = 0;
-      n_i[0] = i - 1; n_j[0] = j - 1;
-      n_i[1] = i - 1; n_j[1] = j;
-      n_i[2] = i - 1; n_j[2] = j + 1;
-      n_i[3] = i;     n_j[3] = j + 1;
-      n_i[4] = i + 1; n_j[4] = j + 1;
-      n_i[5] = i + 1; n_j[5] = j;
-      n_i[6] = i + 1; n_j[6] = j - 1;
-      n_i[7] = i;     n_j[7] = j - 1;
+      n_j[0] = j - 1;
+      n_j[1] = j;
+      n_j[2] = j + 1;
+      n_j[3] = j + 1;
+      n_j[4] = j + 1;
+      n_j[5] = j;
+      n_j[6] = j - 1;
+      n_j[7] = j - 1;
 
       if (n_i[0] >= 0 && n_j[0] >= 0
           && current_grid[n_i[0] * m + n_j[0]] == ALIVE) neighbours++;

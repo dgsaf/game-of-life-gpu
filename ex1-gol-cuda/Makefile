@@ -2,7 +2,7 @@
 
 CC=gcc
 #COMMONFLAGS=#-DUSEPNG
-COMMONFLAGS=-std=c++03
+COMMONFLAGS=-std=c++03 -O2
 INCLUDES=#-I/usr/include
 LIBS=#-L/usr/lib64/ -lpng
 

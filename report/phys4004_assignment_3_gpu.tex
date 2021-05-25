@@ -1,4 +1,4 @@
-\documentclass[draft]{article}
+\documentclass{article}
 
 % - Style
 \usepackage{base}
@@ -35,6 +35,8 @@
   , backgroundcolor=\color{white}
   , rulecolor=\color{black}
   , captionpos=b
+  %
+  , language=C
 }
 
 % file or folder
@@ -71,7 +73,7 @@
 The entire code repository can be found at
 \url{https://github.com/dgsaf/game-of-life-gpu}.
 Conway's Game of Life has been accelerated using GPU programming with two
-schemes, CUDA and OpenACC.
+models, CUDA and OpenACC, both using C.
 The code has been derived from the original code which was provided by Cristian
 Di Pietrantonio, and Maciej Cytowski.
 It consists of the following items of interest:
@@ -81,8 +83,7 @@ It consists of the following items of interest:
   document.
 
 \item \lilf{ex1-gol-cuda/}, \lilf{ex2-gol-gpu-directives/openacc/}:
-  Both the CUDA and OpenACC directories have a similar structure, which consists
-  of:
+  The CUDA and OpenACC directories have a similar structure, which consists of:
 
   \begin{itemize}
   \item \lilf{cpu.slurm}:
@@ -121,6 +122,53 @@ It consists of the following items of interest:
 
 \section{CPU Code}
 \label{sec:cpu-code}
+
+The original code for both the CUDA and OpenACC models has been modified
+slightly.
+\begin{itemize}
+\item
+  Minor C formatting changes have been made, although only where the original
+  code was modified - unmodified regions of the code remain unadjusted.
+
+\item
+  Debugging macros have been utilised to annotate the code for clarity, and can
+  be compiled away to yield performant code.
+
+\item
+  The timing methods in \lilf{common.c}, \lilf{common.h}, have been
+  standardised across the CUDA and OpenACC codes; having originally yielding
+  different return types in each model.
+  The function \lstinline{float get_elapsed_time(struct timeval start)} now
+  returns the time since \lstinline{start} was initialised, in
+  [\si{\milli\second}], for both codes.
+
+\item
+  In \lilf{common.c}, \lilf{common.h}, the ASCII visualisation has been modified
+  in the following ways: it truncates the grid so that even large grids can be
+  partially visualised in the terminal - allowing for easier verification of
+  grid states across codes, it builds the visualisation output in a buffer
+  string which is the printed in one call to avoid interference from
+  asynchronous terminal behaviour.
+
+\end{itemize}
+
+It should be noted that the debugging macros are also ported to the GPU codes,
+and so, are common to the CPU and GPU codes across both models.
+The debugging macros are shown in \autoref{lst:debug_macros}, and can be called
+with a format string, and variable number of arguments similar to how
+\lstinline{printf()} is called.
+
+\lstinputlisting[
+language=C
+, linerange={3-31}
+, firstnumber=3
+, caption={
+  Debugging macros from \lilf{ex1-gol-cuda/src/game_of_life.c}.
+  Note that these macros are common to both CPU and GPU codes across both
+  models.
+}
+, label={lst:debug_macros}
+]{../ex1-gol-cuda/src/game_of_life.c}
 
 \section{GPU Code}
 \label{sec:Gpu-code}

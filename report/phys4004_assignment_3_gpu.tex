@@ -189,17 +189,10 @@ relative to the CPU, to the file \lilf{output/performance.nsteps-100.txt}.
 
 The performance characteristics of the CUDA code (that is, the extracted timing
 data) are shown in \autoref{tab:cuda-performance} and the timing data is plotted
-in \autoref{fig:cuda-timing}.
+in \autoref{fig:cuda-performance}.
 
 \begin{table}[h]
   \begin{center}
-    \label{tab:cuda-performance}
-    \caption{
-      Performance characteristics of CUDA code, compiled with
-      \lstinline[language=bash]{-02}, and with debugging statements turned off.
-      All times are presented in units of \si{\ms}.
-    }
-
     \pgfplotstabletypeset
     [ multicolumn names
     , col sep=comma
@@ -245,18 +238,22 @@ in \autoref{fig:cuda-timing}.
     }
     ]{../ex1-gol-cuda/output/performance.nsteps-100.txt}
   \end{center}
+  \caption{
+    Performance characteristics of CUDA code, compiled with
+    \lstinline[language=bash]{-02}, and with debugging statements turned off.
+    All times are presented in units of \si{\ms}.
+  }
+  \label{tab:cuda-performance}
 \end{table}
 
 \begin{figure}[h]
-  \label{fig:cuda-timing}
-  \caption{}
   \centering
   \begin{tikzpicture}
     \begin{axis}[
       use units
       , scale = 1.0
       , title = {
-        Comparison of CPU and GPU-CUDA GOL Scaling Performance
+        CPU and GPU-CUDA GOL Scaling Performance
       }
       , grid = major
       , xmode = log
@@ -309,6 +306,13 @@ in \autoref{fig:cuda-timing}.
       \addlegendentry{\lstinline{kernel_time}}
     \end{axis}
   \end{tikzpicture}
+  \caption{
+    The scaling performance of the CPU and GPU-CUDA GOL codes are shown for
+    \lstinline{n = m = 1, 2, 4, 8, ..., 16384}, with \lstinline{nsteps = 100}.
+    Note that the x-axis is presented in $\log_{2}$ scale, and the y-axis is
+    presented in $\log_{10}$ scale.
+  }
+  \label{fig:cuda-performance}
 \end{figure}
 
 \clearpage
@@ -316,18 +320,11 @@ in \autoref{fig:cuda-timing}.
 \label{sec:cpu-code}
 
 The performance characteristics of the OpenACC code (that is, the extracted
-timing data) are shown in \autoref{tab:cuda-performance} and the timing data is
-plotted in \autoref{fig:cuda-timing}.
+timing data) are shown in \autoref{tab:openacc-performance} and the timing data is
+plotted in \autoref{fig:openacc-performance}.
 
 \begin{table}[h]
   \begin{center}
-    \label{tab:openacc-performance}
-    \caption{
-      Performance characteristics of OpenACC code, compiled with
-      \lstinline[language=bash]{-02}, and with debugging statements turned off.
-      All times are presented in units of \si{\ms}.
-    }
-
     \pgfplotstabletypeset
     [ multicolumn names
     , col sep=comma
@@ -373,18 +370,22 @@ plotted in \autoref{fig:cuda-timing}.
     }
     ]{../ex2-gol-gpu-directives/openacc/output/performance.nsteps-100.txt}
   \end{center}
+  \caption{
+    Performance characteristics of OpenACC code, compiled with
+    \lstinline[language=bash]{-02}, and with debugging statements turned off.
+    All times are presented in units of \si{\ms}.
+  }
+  \label{tab:openacc-performance}
 \end{table}
 
 \begin{figure}[h]
-  \label{fig:openacc-timing}
-  \caption{}
   \centering
   \begin{tikzpicture}
     \begin{axis}[
       use units
       , scale = 1.0
       , title = {
-        Comparison of CPU and GPU-OpenACC GOL Scaling Performance
+        CPU and GPU-OpenACC GOL Scaling Performance
       }
       , grid = major
       , xmode = log
@@ -438,6 +439,33 @@ plotted in \autoref{fig:cuda-timing}.
       \addlegendentry{\lstinline{kernel_time}}
     \end{axis}
   \end{tikzpicture}
+  \caption{
+    The scaling performance of the CPU and GPU-OpenACC GOL codes are shown for
+    \lstinline{n = m = 1, 2, 4, 8, ..., 16384}, with \lstinline{nsteps = 100}.
+    Note that the x-axis is presented in $\log_{2}$ scale, and the y-axis is
+    presented in $\log_{10}$ scale.
+  }
+  \label{fig:openacc-performance}
 \end{figure}
+
+It can be seen that the CPU code is more performant that the GPU-OpenACC code
+for small grid sizes up to \lstinline{n = m = 512}.
+We note also that is scales exponentially with the grid size, for all grid
+sizes.
+
+It can be seen that OpenACC code is uniformly performant for grid sizes up
+to \lstinline{n = m = 4096}, at which point it begins to scale exponentially
+with the grid size, but at a slower rate than the CPU code.
+
+It can also be seen that \lstinline{kernel_time} is significantly smaller than
+\lstinline{elapsed_time}, and is uniform for grid sizes up to
+\lstinline{n = m = 512}, at which point it begins to scale exponentially with
+the grid size, until it converges with \lstinline{elapsed_time}.
+This behaviour reflects the fact that for small grid sizes, the amount of
+computation required is relatively small, and thus the majority of time
+is spent allocating memory, control flow, et cetera, and not in the kernel.
+However, as the grid size increases, the amount of computation required
+increases, and so the majority of time increasingly tends to be spent in the
+kernel.
 
 \end{document}

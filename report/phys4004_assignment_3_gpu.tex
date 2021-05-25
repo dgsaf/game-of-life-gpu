@@ -159,15 +159,15 @@ with a format string, and variable number of arguments similar to how
 \lstinline{printf()} is called.
 
 \lstinputlisting[
-language=C
-, linerange={3-31}
-, firstnumber=3
+label={lst:debug_macros}
 , caption={
   Debugging macros from \lilf{ex1-gol-cuda/src/game_of_life.c}.
   Note that these macros are common to both CPU and GPU codes across both
   models.
 }
-, label={lst:debug_macros}
+, language=C
+, linerange={3-31}
+, firstnumber=3
 ]{../ex1-gol-cuda/src/game_of_life.c}
 
 \section{GPU Code}
@@ -176,10 +176,110 @@ language=C
 \subsection{CUDA Code}
 \label{sec:cuda-code}
 
+\begin{table}[h]
+  \begin{center}
+    \label{tab:cuda-performance}
+    \caption{
+      Performance characteristics of CUDA code.
+      All times are presented in units of \si{\ms}.
+    }
+
+    \pgfplotstabletypeset
+    [ multicolumn names
+    , col sep=comma
+    , display columns/0/.style={
+      column name=\lstinline{n = m}
+      , dec sep align
+    }
+    , display columns/1/.style={
+      column name=\lstinline{cpu_elapsed_time}
+      , fixed
+      , dec sep align
+      , precision=2
+    }
+    , display columns/2/.style={
+      column name=\lstinline{gpu_elapsed_time}
+      , fixed
+      , dec sep align
+      , precision=2
+    }
+    , display columns/3/.style={
+      column name=\lstinline{speedup}
+      , fixed
+      , dec sep align
+      , precision=4
+    }
+    , display columns/4/.style={
+      column name=\lstinline{kernel_time}
+      , fixed
+      , dec sep align
+      , precision=2
+    }
+    , every head row/.style={
+      before row={\toprule}
+      , after row={\midrule}
+    }
+    , every last row/.style={
+      after row=\bottomrule
+    }
+    ]{../ex1-gol-cuda/output/performance.nsteps-100.txt}
+  \end{center}
+\end{table}
+
 % figure - performance
 
 \subsection{OpenACC Code}
 \label{sec:cpu-code}
+
+\begin{table}[h]
+  \begin{center}
+    \label{tab:openacc-performance}
+    \caption{
+      Performance characteristics of OpenACC code.
+      All times are presented in units of \si{\ms}.
+    }
+
+    \pgfplotstabletypeset
+    [ multicolumn names
+    , col sep=comma
+    , display columns/0/.style={
+      column name=\lstinline{n = m}
+      , dec sep align
+    }
+    , display columns/1/.style={
+      column name=\lstinline{cpu_elapsed_time}
+      , fixed
+      , dec sep align
+      , precision=2
+    }
+    , display columns/2/.style={
+      column name=\lstinline{gpu_elapsed_time}
+      , fixed
+      , dec sep align
+      , precision=2
+    }
+    , display columns/3/.style={
+      column name=\lstinline{speedup}
+      , fixed
+      , dec sep align
+      , precision=4
+    }
+    , display columns/4/.style={
+      column name=\lstinline{kernel_time}
+      , fixed
+      , dec sep align
+      , precision=2
+    }
+    , every head row/.style={
+      before row={\toprule}
+      , after row={\midrule}
+    }
+    , every last row/.style={
+      after row=\bottomrule
+    }
+    ]{../ex2-gol-gpu-directives/openacc/output/performance.nsteps-100.txt}
+  \end{center}
+\end{table}
 
 % figure - performance
 

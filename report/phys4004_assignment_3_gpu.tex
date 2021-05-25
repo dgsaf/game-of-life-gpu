@@ -6,8 +6,8 @@
 % - Plotting
 \usepackage{pgfplotstable}
 \usepgfplotslibrary{units}
-\usetikzlibrary{external}
-\tikzexternalize[mode=list and make]
+% \usetikzlibrary{external}
+% \tikzexternalize[mode=list and make]
 
 % - Listings
 \usepackage{color}
@@ -174,8 +174,22 @@ label={lst:debug_macros}
 \section{GPU Code}
 \label{sec:Gpu-code}
 
+For both models, on Topaz, the script \lilf{jobs.sh} was used to submit, for
+each of \lstinline{n = m = 1, 2, 4, 8, ..., 16384}, pairs of jobs, running the
+CPU and GPU codes for these values of \lstinline{n, m}, and with
+\lstinline{nsteps = 100}.
+The CPU and GPU codes were compiled with \lstinline{-O2}, and with all debugging
+macros (including timing and visualisation macros) turned off.
+After every job had been completed, the script \lilf{extract.sh} was used to
+extract the timing data for the entire job set, and calculate the GPU speedup
+relative to the CPU, to the file \lilf{output/performance.nsteps-100.txt}.
+
 \subsection{CUDA Code}
 \label{sec:cuda-code}
+
+The performance characteristics of the CUDA code (that is, the extracted timing
+data) are shown in \autoref{tab:cuda-performance} and the timing data is plotted
+in \autoref{fig:cuda-timing}.
 
 \begin{table}[h]
   \begin{center}
@@ -233,11 +247,77 @@ label={lst:debug_macros}
   \end{center}
 \end{table}
 
-% figure - performance
+\begin{figure}[h]
+  \label{fig:cuda-timing}
+  \caption{}
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      use units
+      , scale = 1.0
+      , title = {
+        Comparison of CPU and GPU-CUDA GOL Scaling Performance
+      }
+      , grid = major
+      , xmode = log
+      , ymode = log
+      , log basis x = {2}
+      , log basis y = {10}
+      , xmin = 1
+      , xmax = 16384
+      , xlabel = {\lstinline{n = m}}
+      , ylabel = {Time}
+      , y unit = {\si{\ms}}
+      % , xtick={
+      %   1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384
+      % }
+      , xtick={
+        1, 4, 16, 64, 256, 1024, 4096, 16384
+      }
+      % , xticklabels={
+      %   1, 4, 16, 64, 256, 1024, 4096, 16384
+      % }
+      , legend entries
+      , legend style = {
+        cells = {anchor=west}
+        , legend pos = north west
+        , font = \tiny
+      }
+      ]
+
+      \pgfplotstableread[
+      col sep = comma
+      , header = true
+      ]{../ex1-gol-cuda/output/performance.nsteps-100.txt}{\data}
+
+      \addplot [
+      color = black
+      , mark = diamond*
+      ] table [x index = {0}, y index = {1}] \data;
+      \addlegendentry{\lstinline{cpu_elapsed_time}}
+
+      \addplot [
+      color = red
+      , mark = diamond*
+      ] table [x index = {0}, y index = {2}] \data;
+      \addlegendentry{\lstinline{gpu_elapsed_time}}
+
+      \addplot [
+      color = orange
+      , mark = diamond*
+      ] table [x index = {0}, y index = {4}] \data;
+      \addlegendentry{\lstinline{kernel_time}}
+    \end{axis}
+  \end{tikzpicture}
+\end{figure}
 
 \clearpage
 \subsection{OpenACC Code}
 \label{sec:cpu-code}
+
+The performance characteristics of the OpenACC code (that is, the extracted
+timing data) are shown in \autoref{tab:cuda-performance} and the timing data is
+plotted in \autoref{fig:cuda-timing}.
 
 \begin{table}[h]
   \begin{center}
@@ -295,6 +375,69 @@ label={lst:debug_macros}
   \end{center}
 \end{table}
 
-% figure - performance
+\begin{figure}[h]
+  \label{fig:openacc-timing}
+  \caption{}
+  \centering
+  \begin{tikzpicture}
+    \begin{axis}[
+      use units
+      , scale = 1.0
+      , title = {
+        Comparison of CPU and GPU-OpenACC GOL Scaling Performance
+      }
+      , grid = major
+      , xmode = log
+      , ymode = log
+      , log basis x = {2}
+      , log basis y = {10}
+      , xmin = 1
+      , xmax = 16384
+      , xlabel = {\lstinline{n = m}}
+      , ylabel = {Time}
+      , y unit = {\si{\ms}}
+      % , xtick={
+      %   1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384
+      % }
+      , xtick={
+        1, 4, 16, 64, 256, 1024, 4096, 16384
+      }
+      % , xticklabels={
+      %   1, 4, 16, 64, 256, 1024, 4096, 16384
+      % }
+      , legend entries
+      , legend style = {
+        cells = {anchor=west}
+        , legend pos = north west
+        , font = \tiny
+      }
+      ]
+
+      \pgfplotstableread[
+      col sep = comma
+      , header = true
+      ]{../ex2-gol-gpu-directives/openacc/output/performance.nsteps-100.txt}
+      {\data}
+
+      \addplot [
+      color = black
+      , mark = diamond*
+      ] table [x index = {0}, y index = {1}] \data;
+      \addlegendentry{\lstinline{cpu_elapsed_time}}
+
+      \addplot [
+      color = red
+      , mark = diamond*
+      ] table [x index = {0}, y index = {2}] \data;
+      \addlegendentry{\lstinline{gpu_elapsed_time}}
+
+      \addplot [
+      color = orange
+      , mark = diamond*
+      ] table [x index = {0}, y index = {4}] \data;
+      \addlegendentry{\lstinline{kernel_time}}
+    \end{axis}
+  \end{tikzpicture}
+\end{figure}
 
 \end{document}

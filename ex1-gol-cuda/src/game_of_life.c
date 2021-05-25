@@ -49,24 +49,24 @@ void cpu_game_of_life_step(int *current_grid, int *next_grid, int n, int m)
       n_i[6] = i + 1; n_j[6] = j - 1;
       n_i[7] = i;     n_j[7] = j - 1;
 
-      if (n_i[0] >= 0 && n_j[0] >= 0 \
+      if (n_i[0] >= 0 && n_j[0] >= 0
           && current_grid[n_i[0] * m + n_j[0]] == ALIVE) neighbours++;
-      if (n_i[1] >= 0                                                   \
+      if (n_i[1] >= 0
           && current_grid[n_i[1] * m + n_j[1]] == ALIVE) neighbours++;
-      if (n_i[2] >= 0 && n_j[2] < m \
+      if (n_i[2] >= 0 && n_j[2] < m
           && current_grid[n_i[2] * m + n_j[2]] == ALIVE) neighbours++;
-      if (n_j[3] < m \
+      if (n_j[3] < m
           && current_grid[n_i[3] * m + n_j[3]] == ALIVE) neighbours++;
-      if (n_i[4] < n && n_j[4] < m \
+      if (n_i[4] < n && n_j[4] < m
           && current_grid[n_i[4] * m + n_j[4]] == ALIVE) neighbours++;
-      if (n_i[5] < n \
+      if (n_i[5] < n
           && current_grid[n_i[5] * m + n_j[5]] == ALIVE) neighbours++;
-      if (n_i[6] < n && n_j[6] >= 0 \
+      if (n_i[6] < n && n_j[6] >= 0
           && current_grid[n_i[6] * m + n_j[6]] == ALIVE) neighbours++;
-      if (n_j[7] >= 0 \
+      if (n_j[7] >= 0
           && current_grid[n_i[7] * m + n_j[7]] == ALIVE) neighbours++;
 
-      if (current_grid[i*m + j] == ALIVE  \
+      if (current_grid[i*m + j] == ALIVE
           && (neighbours == 2 || neighbours == 3))
       {
         next_grid[i*m + j] = ALIVE;
@@ -167,7 +167,7 @@ int cpu_write_timing(struct Options const * opt, float const elapsed_time)
   int ierr = 0;
 
   // create filename for given options
-  sprintf(filename, "output/timing-cpu.n-%i.m-%i.nsteps-%i.txt", \
+  sprintf(filename, "output/timing-cpu.n-%i.m-%i.nsteps-%i.txt",
           opt->n, opt->m, opt->nsteps);
 
   printf("writing cpu timing data to filename: %s\n", filename);
@@ -223,7 +223,7 @@ int main(int argc, char **argv)
   const int m = opt->m;
   const int nsteps = opt->nsteps;
 
-  verbose("parameters defined: <n> = %i, <m> = %i, <nsteps> = %i", \
+  verbose("parameters defined: <n> = %i, <m> = %i, <nsteps> = %i",
           n, m, nsteps);
 
   // allocate memory for `initial_state` variable
